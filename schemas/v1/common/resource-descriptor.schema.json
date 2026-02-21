@@ -25,7 +25,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["bearer", "oauth", "api_key"],
+          "enum": ["bearer", "basic", "header", "oauth2"],
           "description": "Authentication mechanism to use."
         },
         "token_env": {
@@ -41,7 +41,7 @@
     },
     "refresh": {
       "type": "string",
-      "enum": ["manual", "on-access", "hourly", "daily", "weekly"],
+      "enum": ["session", "daily", "weekly", "manual"],
       "description": "How frequently the resource content should be refreshed."
     },
     "mime_type": {

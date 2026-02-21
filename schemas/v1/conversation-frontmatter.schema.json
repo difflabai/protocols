@@ -4,7 +4,7 @@
   "title": "Conversation Frontmatter",
   "description": "Validates the YAML frontmatter of conversation files in .project/conversations/. Conversations are archived AI sessions with structured metadata for discovery and Tier 1 catalog building.",
   "type": "object",
-  "required": ["id", "title", "summary"],
+  "required": ["title", "summary"],
   "properties": {
     "id": {
       "type": "string",
@@ -43,7 +43,7 @@
     },
     "format": {
       "type": "string",
-      "enum": ["markdown", "yaml", "jsonl", "provider-native"],
+      "enum": ["markdown", "jsonl", "provider-native"],
       "description": "Format of the conversation body content."
     }
   },

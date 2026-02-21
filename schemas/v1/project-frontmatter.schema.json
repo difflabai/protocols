@@ -4,7 +4,7 @@
   "title": "Project Frontmatter",
   "description": "Validates the YAML frontmatter of PROJECT.md, the only required file in a .project directory. Contains project identity, provider preferences, hierarchy configuration, and AGENTS.md reconciliation settings.",
   "type": "object",
-  "required": ["spec", "name", "description"],
+  "required": ["spec"],
   "properties": {
     "spec": {
       "type": "string",

@@ -4,7 +4,7 @@
   "title": "Task Frontmatter",
   "description": "Validates the YAML frontmatter of task files in .project/tasks/. Tasks are A2A-compatible work items with structured status tracking, assignment, priority, and dependency management.",
   "type": "object",
-  "required": ["id", "title"],
+  "required": ["title", "status"],
   "properties": {
     "id": {
       "type": "string",
@@ -16,7 +16,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["working", "completed", "failed", "canceled", "input_required", "auth_required", "rejected"],
+      "enum": ["submitted", "working", "input_required", "completed", "failed", "canceled"],
       "description": "Current task status. Values align with A2A protocol states."
     },
     "assignee": {
