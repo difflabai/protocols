@@ -1,2 +1,14 @@
-# protocols
-Public protocols and standards supported by Differential AI Lab
+# Protocols
+
+Open standards and protocols for AI development, supported by [Differential AI Lab](https://difflab.ai).
+
+## Development
+
+```bash
+npm install
+npm start
+```
+
+The site is built with [Docusaurus](https://docusaurus.io/) and deployed to GitHub Pages automatically on push to `main`.
+
+**Live site**: https://difflabai.github.io/protocols/
