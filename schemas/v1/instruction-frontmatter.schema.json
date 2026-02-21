@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/instruction-frontmatter.schema.json",
+  "title": "Instruction Frontmatter",
+  "description": "Validates the YAML frontmatter of instruction files in .project/instructions/. Instructions provide domain-specific guidance loaded via progressive disclosure based on applies_to patterns and activation settings.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "applies_to": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Glob patterns for files and paths that trigger loading this instruction (e.g., [\"src/server/**\", \"**/*.go\"])."
+    },
+    "priority": {
+      "type": "integer",
+      "description": "Numeric priority for ordering instructions. Higher values take precedence."
+    },
+    "activation": {
+      "type": "string",
+      "enum": ["auto", "manual", "always"],
+      "description": "How this instruction is activated. 'auto' loads when context matches, 'manual' requires explicit request, 'always' loads at session start."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and discovery."
+    },
+    "providers": {
+      "type": "object",
+      "description": "Provider-specific inclusion or exclusion rules.",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Only load this instruction for these providers."
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Never load this instruction for these providers."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/resource-frontmatter.schema.json",
+  "title": "Resource Frontmatter",
+  "description": "Validates the YAML frontmatter of resource files in .project/resources/. Resources are external references (deployments, design systems, CI pipelines, documentation) that exist for awareness and human reference. They are Tier 1 only — their metadata is the content, not something to be fetched.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the external resource."
+    },
+    "type": {
+      "type": "string",
+      "description": "Category of the resource (e.g., deployment, design, ci, documentation, monitoring). Free-form string, not an enum."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and discovery."
+    }
+  },
+  "additionalProperties": true
+}

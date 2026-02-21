@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/project-frontmatter.schema.json",
+  "title": "Project Frontmatter",
+  "description": "Validates the YAML frontmatter of PROJECT.md, the only required file in a .project directory. Contains project identity, provider preferences, hierarchy configuration, and AGENTS.md reconciliation settings.",
+  "type": "object",
+  "required": ["spec", "name", "description"],
+  "properties": {
+    "spec": {
+      "type": "string",
+      "description": "Semantic version of the .project standard this file conforms to (e.g., \"1.0\")."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable project name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Overview of the project, its purpose, and its tech stack."
+    },
+    "id": {
+      "type": "string",
+      "description": "Optional reverse-domain identifier for the project (e.g., org.example.my-app)."
+    },
+    "version": {
+      "type": "string",
+      "description": "Project version string."
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier or license name."
+    },
+    "repository": {
+      "type": "object",
+      "description": "Source repository information.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Version control system type (e.g., git, svn)."
+        },
+        "url": {
+          "type": "string",
+          "description": "Repository URL."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Default branch name."
+        },
+        "subtree": {
+          "type": "string",
+          "description": "Path within the repository for monorepo setups."
+        }
+      },
+      "additionalProperties": true
+    },
+    "providers": {
+      "type": "object",
+      "description": "AI provider preferences.",
+      "properties": {
+        "preferred": {
+          "type": "string",
+          "description": "Preferred AI provider identifier."
+        },
+        "supported": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of supported AI provider identifiers."
+        }
+      },
+      "additionalProperties": true
+    },
+    "agents_md": {
+      "type": "object",
+      "description": "AGENTS.md reconciliation configuration.",
+      "properties": {
+        "pointer": {
+          "type": "boolean",
+          "description": "Whether AGENTS.md should contain a pointer to .project/."
+        },
+        "fallback": {
+          "type": "boolean",
+          "description": "Whether to load AGENTS.md content as base-priority instructions after .project/instructions/."
+        }
+      },
+      "additionalProperties": true
+    },
+    "hierarchy": {
+      "type": "object",
+      "description": "Hierarchical override configuration for nested .project directories.",
+      "properties": {
+        "merge": {
+          "type": "string",
+          "enum": ["nearest-wins", "deep-merge", "replace"],
+          "description": "Strategy for merging settings from parent .project directories."
+        },
+        "inherit": {
+          "type": "boolean",
+          "description": "Whether to walk up the directory tree and inherit from parent .project directories."
+        }
+      },
+      "additionalProperties": true
+    },
+    "conversations": {
+      "type": "object",
+      "description": "Conversation system configuration.",
+      "properties": {
+        "default_format": {
+          "type": "string",
+          "description": "Default format for conversation files (e.g., markdown, yaml, jsonl, provider-native)."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

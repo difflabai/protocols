@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/common/catalog-entry.schema.json",
+  "title": "Catalog Entry",
+  "description": "Shared base schema for any .project item that has a name and description. Used for Tier 1 progressive disclosure — these two fields are scanned at session startup to build the item catalog.",
+  "type": "object",
+  "required": ["name", "description"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Short identifier for this item. Used in catalogs and references."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1024,
+      "description": "Human-readable description of what this item contains and when it should be loaded. Should explain both content and usage triggers."
+    }
+  },
+  "additionalProperties": true
+}

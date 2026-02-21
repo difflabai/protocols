@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/task-frontmatter.schema.json",
+  "title": "Task Frontmatter",
+  "description": "Validates the YAML frontmatter of task files in .project/tasks/. Tasks are A2A-compatible work items with structured status tracking, assignment, priority, and dependency management.",
+  "type": "object",
+  "required": ["id", "title"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this task (e.g., task-001)."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title describing the task."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["working", "completed", "failed", "canceled", "input_required", "auth_required", "rejected"],
+      "description": "Current task status. Values align with A2A protocol states."
+    },
+    "assignee": {
+      "type": "object",
+      "description": "Who is assigned to this task.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["user", "agent"],
+          "description": "Whether the assignee is a human user or an AI agent."
+        },
+        "id": {
+          "type": "string",
+          "description": "Identifier of the assigned user or agent."
+        }
+      },
+      "additionalProperties": true
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Task priority level."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and discovery."
+    },
+    "blocked_by": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of task IDs that must be completed before this task can proceed."
+    },
+    "blocks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of task IDs that are blocked by this task."
+    },
+    "context_id": {
+      "type": "string",
+      "description": "A2A contextId for grouping related tasks (e.g., sprint identifier)."
+    }
+  },
+  "additionalProperties": true
+}

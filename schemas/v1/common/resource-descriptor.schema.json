@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/common/resource-descriptor.schema.json",
+  "title": "Resource Descriptor",
+  "description": "Shared base schema for remote resource references. Used by memory, context, and extension files to describe external data sources that can be fetched or referenced.",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["local", "url", "api", "database"],
+      "description": "The kind of remote resource being referenced."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the remote resource."
+    },
+    "path": {
+      "type": "string",
+      "description": "Local filesystem path to the resource, relative to the .project directory."
+    },
+    "auth": {
+      "type": "object",
+      "description": "Authentication configuration for accessing the resource. Secrets are referenced via environment variable names, never stored inline.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["bearer", "oauth", "api_key"],
+          "description": "Authentication mechanism to use."
+        },
+        "token_env": {
+          "type": "string",
+          "description": "Environment variable name containing the bearer or OAuth token."
+        },
+        "key_env": {
+          "type": "string",
+          "description": "Environment variable name containing the API key."
+        }
+      },
+      "additionalProperties": true
+    },
+    "refresh": {
+      "type": "string",
+      "enum": ["manual", "on-access", "hourly", "daily", "weekly"],
+      "description": "How frequently the resource content should be refreshed."
+    },
+    "mime_type": {
+      "type": "string",
+      "description": "MIME type of the resource content (e.g., application/yaml, image/png)."
+    }
+  },
+  "additionalProperties": true
+}
