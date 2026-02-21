@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build
+build/
+.docusaurus/
+
+# Misc
+.DS_Store
+*.log
+.env
+.env.local
+
+# Context
+.context/
+Plans/
