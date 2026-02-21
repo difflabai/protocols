@@ -32,7 +32,9 @@ description: >
 Overview of the project for humans and AI alike.
 ```
 
-That's it. One file makes a valid `.project/` directory. Add more as needed:
+That's it. One file makes a valid `.project/` directory. If your repo already uses a `.project` file (e.g., Eclipse), use `.aiproject/` instead — the spec supports both names.
+
+Add more as needed:
 
 ```
 .project/

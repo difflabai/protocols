@@ -123,7 +123,17 @@ The standard prioritizes practical adoption over rigid conformance:
 
 ## 4. Directory Structure
 
-A conforming `.project/` directory MUST contain a `PROJECT.md` file. All other directories and files are OPTIONAL and added as needed.
+### 4.0 Directory Naming
+
+The RECOMMENDED directory name is **`.project/`**. Implementors MUST also check for **`.aiproject/`** as an alternative name.
+
+`.aiproject/` exists because Eclipse IDE uses a `.project` **file** (XML) at the repository root. On Unix, macOS, and Linux a file and directory cannot share the same name, making `.project/` incompatible with Eclipse-based projects (including Gradle and Maven Eclipse plugin integration). Repositories with this conflict SHOULD use `.aiproject/` instead.
+
+When discovering a project directory, implementors MUST check `.project/` first. If not found, they MUST check `.aiproject/`. If both exist in the same directory, `.project/` takes precedence. The internal structure and all other rules in this specification apply identically regardless of which name is used.
+
+### 4.1 Structure
+
+A conforming `.project/` (or `.aiproject/`) directory MUST contain a `PROJECT.md` file. All other directories and files are OPTIONAL and added as needed.
 
 ```
 .project/
@@ -1760,9 +1770,14 @@ PROCEDURE LoadProject(working_directory):
   1. LET project_dirs = []
   2. LET dir = working_directory
   3. WHILE dir != filesystem_root:
+       LET project_dir = NULL
        IF exists(dir + "/.project/PROJECT.md"):
-         PREPEND dir + "/.project/" TO project_dirs
-         LET manifest = parse_frontmatter(dir + "/.project/PROJECT.md")
+         project_dir = dir + "/.project/"
+       ELSE IF exists(dir + "/.aiproject/PROJECT.md"):
+         project_dir = dir + "/.aiproject/"
+       IF project_dir != NULL:
+         PREPEND project_dir TO project_dirs
+         LET manifest = parse_frontmatter(project_dir + "PROJECT.md")
          IF manifest.hierarchy.inherit != true:
            BREAK
        dir = parent(dir)
