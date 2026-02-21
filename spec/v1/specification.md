@@ -108,11 +108,11 @@ Every component separates description from content using a three-tier loading mo
 
 **Tier 1 discovery**: Implementors scan directories and read only YAML frontmatter from each `.md` file to build a catalog. No index file is required --- the frontmatter IS the index.
 
-**Optional `_index.md`**: Directories MAY include an `_index.md` file whose frontmatter lists entries with names and descriptions as a pre-built catalog (avoiding the need to scan many individual files). The body of `_index.md` can contain any useful overview text.
+**Optional `index.md`**: Directories MAY include an `index.md` file whose frontmatter lists entries with names and descriptions as a pre-built catalog (avoiding the need to scan many individual files). The body of `index.md` can contain any useful overview text.
 
 **The `description` field** SHOULD explain both what the item contains AND when it should be loaded (usage triggers). This dual purpose allows tools to match items to the current context without loading the full content.
 
-**Content is never loaded eagerly** except for items marked `activation: always` (such as `_defaults.md`) and the `PROJECT.md` manifest.
+**Content is never loaded eagerly** except for items marked `activation: always` (such as `defaults.md`) and the `PROJECT.md` manifest.
 
 ### 3.3 Context vs Resources
 
@@ -134,7 +134,7 @@ The standard distinguishes between two categories of linked content:
 The standard follows predictable conventions to minimize required configuration:
 
 - File names serve as identifiers when `name` is not specified in frontmatter.
-- Files prefixed with `_` have special meaning (`_defaults.md`, `_index.md`, `_local.md`).
+- Files prefixed with `_` have special meaning (`defaults.md`, `index.md`, `local.md`).
 - Subdirectories within a system directory provide organizational grouping.
 - Default behaviors are always the most common use case.
 
@@ -158,49 +158,49 @@ A conforming `.project/` directory MUST contain a `PROJECT.md` file. All other d
   PROJECT.md                         # [REQUIRED] Project manifest
 
   instructions/                      # [OPTIONAL] Project instructions
-    _defaults.md                     #   Base instructions (always loaded)
+    defaults.md                     #   Base instructions (always loaded)
     <topic>.md                       #   Domain-specific instructions
-    _local.md                        #   Personal overrides (gitignored)
+    local.md                        #   Personal overrides (gitignored)
 
   memory/                            # [OPTIONAL] Persistent knowledge
-    _index.md                        #   Optional catalog and overview
+    index.md                        #   Optional catalog and overview
     <topic>.md                       #   Knowledge files
     entities/                        #   Structured entity data
       <entity>.md
 
   conversations/                     # [OPTIONAL] Conversation archives
-    _index.md                        #   Catalog with format configuration
+    index.md                        #   Catalog with format configuration
     <conversation>.md                #   Individual conversations
 
   context/                           # [OPTIONAL] Files for AI context
-    _index.md                        #   Catalog of context files
+    index.md                        #   Catalog of context files
     <file>.<ext>                     #   Local files (any format)
     <descriptor>.md                  #   Metadata for local or remote files
 
   resources/                         # [OPTIONAL] External references
-    _index.md                        #   Catalog of external resources
+    index.md                        #   Catalog of external resources
     <resource>.md                    #   Individual resource descriptions
 
   tasks/                             # [OPTIONAL] Task management
-    _index.md                        #   Task board overview
+    index.md                        #   Task board overview
     active/                          #   Tasks in progress
       <task>.md
     completed/                       #   Finished tasks
       <task>.md
 
   agents/                            # [OPTIONAL] Agent definitions
-    _index.md                        #   Agent catalog
+    index.md                        #   Agent catalog
     <agent>.md                       #   Individual agent definitions
 
   extensions/                        # [OPTIONAL] Plugins and compliance
-    _index.md                        #   Registry and marketplace config
+    index.md                        #   Registry and marketplace config
     <extension>/                     #   Extension directories
 
   adapters/                          # [OPTIONAL] Provider-specific mappings
     <provider>.md                    #   Mapping configuration per provider
 
   users/                             # [OPTIONAL] Multi-user configuration
-    _index.md                        #   Role definitions and policies
+    index.md                        #   Role definitions and policies
     <user>.local.md                  #   Per-user overrides (gitignored)
 
   hooks/                             # [OPTIONAL] Lifecycle scripts
@@ -217,9 +217,9 @@ The root directory MUST be named `.project`. The leading dot follows the establi
 - All markdown files within `.project/` MUST use the `.md` extension.
 - File names SHOULD use lowercase kebab-case (e.g., `auth-refactor.md`, `staging-environment.md`).
 - Files prefixed with `_` (underscore) have special semantics defined by this specification:
-  - `_index.md` --- Optional directory catalog and overview.
-  - `_defaults.md` --- Content that is always loaded (activation: always implied).
-  - `_local.md` --- Personal overrides that MUST be gitignored.
+  - `index.md` --- Optional directory catalog and overview.
+  - `defaults.md` --- Content that is always loaded (activation: always implied).
+  - `local.md` --- Personal overrides that MUST be gitignored.
 - Files with a `.local.md` suffix SHOULD be gitignored.
 
 ### 4.3 Minimal Conformance
@@ -452,9 +452,9 @@ the `domain/` package with no external dependencies...
 
 ### 6.5 Special Files
 
-#### `_defaults.md`
+#### `defaults.md`
 
-The `_defaults.md` file, if present, MUST be treated as having `activation: always` regardless of its frontmatter. It contains base instructions that apply to all interactions.
+The `defaults.md` file, if present, MUST be treated as having `activation: always` regardless of its frontmatter. It contains base instructions that apply to all interactions.
 
 ```markdown
 ---
@@ -470,9 +470,9 @@ description: Base project instructions that always apply.
 - Never commit secrets or credentials
 ```
 
-#### `_local.md`
+#### `local.md`
 
-The `_local.md` file contains personal instruction overrides. It MUST be listed in `.gitignore` (see [Section 20](#20-gitignore-conventions)). It is loaded after all other instructions at the highest priority, allowing individual developers to customize behavior without affecting the team.
+The `local.md` file contains personal instruction overrides. It MUST be listed in `.gitignore` (see [Section 20](#20-gitignore-conventions)). It is loaded after all other instructions at the highest priority, allowing individual developers to customize behavior without affecting the team.
 
 ```markdown
 ---
@@ -499,7 +499,7 @@ When multiple instructions are active, they are applied in this order (lowest pr
 
 1. AGENTS.md fallback content (if enabled) --- priority -1 (implicit)
 2. Instructions sorted by `priority` field (ascending)
-3. `_local.md` --- always applied last (implicit highest priority)
+3. `local.md` --- always applied last (implicit highest priority)
 
 When instructions conflict, the higher-priority instruction wins. Implementors SHOULD warn when detecting contradictory instructions at the same priority level.
 
@@ -507,9 +507,9 @@ When instructions conflict, the higher-priority instruction wins. Implementors S
 
 | `.project` | Claude Code | Codex | Cursor | AGENTS.md |
 |------------|------------|-------|--------|-----------|
-| `instructions/_defaults.md` | Root `CLAUDE.md` | Root `AGENTS.md` | `.cursorrules` | Root `AGENTS.md` |
+| `instructions/defaults.md` | Root `CLAUDE.md` | Root `AGENTS.md` | `.cursorrules` | Root `AGENTS.md` |
 | `instructions/<topic>.md` | `.claude/rules/<topic>.md` | Subdirectory `AGENTS.md` | `.cursor/rules/<topic>.mdc` | Subdirectory `AGENTS.md` |
-| `instructions/_local.md` | `.claude/settings.local.json` | N/A | N/A | N/A |
+| `instructions/local.md` | `.claude/settings.local.json` | N/A | N/A | N/A |
 | `applies_to` | `globs` in `.claude/rules/` | Directory scoping | `globs` in `.cursor/rules/` | Directory scoping |
 
 ---
@@ -854,7 +854,7 @@ The `file` field links the metadata to its companion file. If `file` is not spec
 
 ### 9.4 Auto-Include Patterns
 
-The `_index.md` file MAY specify patterns to automatically include files from the project repository (outside `.project/`) as context:
+The `index.md` file MAY specify patterns to automatically include files from the project repository (outside `.project/`) as context:
 
 ```markdown
 ---
@@ -1065,7 +1065,7 @@ Use tasks for:
 
 ```
 tasks/
-  _index.md                    # Task board overview and configuration
+  index.md                    # Task board overview and configuration
   active/                      # Tasks currently in progress
     task-001.md
     task-002.md
@@ -1341,7 +1341,7 @@ Use extensions for:
 
 ### 13.2 Registry Configuration
 
-The `_index.md` file configures extension registries and lists installed extensions:
+The `index.md` file configures extension registries and lists installed extensions:
 
 ```markdown
 ---
@@ -1551,7 +1551,7 @@ The `users/` directory supports multi-user projects where different team members
 
 ### 15.2 User Index
 
-The `_index.md` file defines roles and team configuration:
+The `index.md` file defines roles and team configuration:
 
 ```markdown
 ---
@@ -1579,7 +1579,7 @@ conflict_resolution: last-writer-wins
 
 ### 15.3 Frontmatter Fields
 
-#### Optional Fields (in `_index.md`)
+#### Optional Fields (in `index.md`)
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -1620,7 +1620,7 @@ This specification does not mandate a user identification mechanism. Implementor
 
 ### 15.6 Loading Behavior
 
-- **Tier 1**: `_index.md` frontmatter loaded to understand roles and policies.
+- **Tier 1**: `index.md` frontmatter loaded to understand roles and policies.
 - **Tier 2**: Current user's `.local.md` file loaded at session startup.
 - **Tier 3**: Not applicable.
 
@@ -1678,7 +1678,7 @@ If the working directory is `/repo/services/api/`, the merge order is:
 
 | System | Merge Behavior |
 |--------|---------------|
-| `instructions/` | Child instructions override parent instructions with the same `name`. New instructions are added. `_defaults.md` from each level is loaded (child after parent). |
+| `instructions/` | Child instructions override parent instructions with the same `name`. New instructions are added. `defaults.md` from each level is loaded (child after parent). |
 | `memory/` | Merged. Child entries with the same `name` override parent entries. |
 | `conversations/` | Not merged. Each `.project/` has its own conversations. |
 | `context/` | Merged. Child `auto_include` patterns override parent patterns. |
@@ -1746,7 +1746,7 @@ Files with these naming patterns MUST be treated as sensitive:
 
 | Pattern | Purpose |
 |---------|---------|
-| `_local.md` | Personal overrides |
+| `local.md` | Personal overrides |
 | `*.local.md` | Per-user configurations |
 | `*.secret.*` | Any file marked as secret |
 
@@ -1806,7 +1806,7 @@ PROCEDURE LoadProject(working_directory):
   6. FOR EACH system_directory IN [instructions, memory, conversations,
        context, resources, tasks, agents, extensions]:
        IF system_directory exists:
-         IF _index.md exists AND has catalog in frontmatter:
+         IF index.md exists AND has catalog in frontmatter:
            USE frontmatter catalog entries
          ELSE:
            SCAN all *.md files in directory (including subdirectories)
@@ -1814,7 +1814,7 @@ PROCEDURE LoadProject(working_directory):
          BUILD catalog: [{name, description, ...metadata}] per item
 
   // Phase 4: Always-On Loading (Tier 2, immediate)
-  7. IF instructions/_defaults.md exists:
+  7. IF instructions/defaults.md exists:
        LOAD full body
   8. FOR EACH item with activation: always:
        LOAD full body
@@ -1858,7 +1858,7 @@ Implementors SHOULD respect the following token budget guidelines:
 |-------|--------|-------|
 | Tier 1 Catalog (all items) | < 5,000 tokens | ~50-100 tokens per item |
 | PROJECT.md body | < 2,000 tokens | Loaded eagerly |
-| `_defaults.md` body | < 3,000 tokens | Loaded eagerly |
+| `defaults.md` body | < 3,000 tokens | Loaded eagerly |
 | Individual Tier 2 item | < 5,000 tokens | Per activated item |
 | Total Tier 2 | < 50,000 tokens | All activated items combined |
 | Tier 3 | Unbounded | Loaded on demand, user-approved |
@@ -1960,8 +1960,8 @@ A repository using `.project/` MUST include the following patterns in its `.giti
 
 ```gitignore
 # .project local and sensitive files
-.project/_local.md
-.project/**/_local.md
+.project/local.md
+.project/**/local.md
 .project/**/*.local.md
 .project/**/*.secret.*
 .project/users/*.local.md
@@ -1983,8 +1983,8 @@ The following patterns are RECOMMENDED:
 # === .project standard ===
 
 # Personal overrides (never committed)
-.project/_local.md
-.project/**/_local.md
+.project/local.md
+.project/**/local.md
 .project/**/*.local.md
 .project/users/*.local.md
 
@@ -2200,9 +2200,9 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Claude Code Equivalent |
 |------------|----------------------|
 | `PROJECT.md` | `.claude/settings.json` + root `CLAUDE.md` |
-| `instructions/_defaults.md` | Root `CLAUDE.md` |
+| `instructions/defaults.md` | Root `CLAUDE.md` |
 | `instructions/<topic>.md` | `.claude/rules/<topic>.md` |
-| `instructions/_local.md` | `.claude/settings.local.json` |
+| `instructions/local.md` | `.claude/settings.local.json` |
 | `instructions.applies_to` | `.claude/rules/*.md` `globs` field |
 | `memory/` | Facts section of `CLAUDE.md` |
 | `agents/<agent>.md` | `.claude/agents/<agent>.md` |
@@ -2214,7 +2214,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Codex Equivalent |
 |------------|-----------------|
 | `PROJECT.md` | Root `AGENTS.md` header |
-| `instructions/_defaults.md` | Root `AGENTS.md` body |
+| `instructions/defaults.md` | Root `AGENTS.md` body |
 | `instructions/<topic>.md` | Subdirectory `AGENTS.md` |
 | `instructions.applies_to` | Directory-scoped `AGENTS.md` |
 
@@ -2223,7 +2223,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Cursor Equivalent |
 |------------|------------------|
 | `PROJECT.md` | `.cursor/config.json` |
-| `instructions/_defaults.md` | `.cursorrules` |
+| `instructions/defaults.md` | `.cursorrules` |
 | `instructions/<topic>.md` | `.cursor/rules/<topic>.mdc` |
 | `instructions.applies_to` | `.cursor/rules/*.mdc` `globs` field |
 | `context/` | `@docs`, `@files` |
@@ -2234,7 +2234,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | AGENTS.md Equivalent |
 |------------|---------------------|
 | `PROJECT.md` | Top-level `AGENTS.md` metadata |
-| `instructions/_defaults.md` | Root `AGENTS.md` body |
+| `instructions/defaults.md` | Root `AGENTS.md` body |
 | `instructions/<topic>.md` | Subdirectory `AGENTS.md` files |
 | `instructions.applies_to` | Directory scoping |
 

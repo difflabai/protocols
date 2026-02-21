@@ -27,7 +27,7 @@ conventions.
 
 | .project/ source | Claude Code target | Notes |
 |------------------|--------------------|-------|
-| `instructions/_defaults.md` | `.claude/rules/defaults.md` | Body content copied as rule file |
+| `instructions/defaults.md` | `.claude/rules/defaults.md` | Body content copied as rule file |
 | `instructions/*.md` | `.claude/rules/*.md` | Each instruction becomes a rule |
 | `agents/*.md` | `.claude/agents/*.md` | Agent definitions mapped directly |
 | `memory/*.md` | `CLAUDE.md` | Memory entries appended to project CLAUDE.md |

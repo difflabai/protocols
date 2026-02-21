@@ -1,5 +1,5 @@
 # .project local and secret files
-.project/instructions/_local.md
+.project/instructions/local.md
 .project/users/*.local.md
 *.secret.*
 

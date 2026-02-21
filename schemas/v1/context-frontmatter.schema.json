@@ -16,7 +16,7 @@
     },
     "auto_include": {
       "type": "object",
-      "description": "Configuration for _index.md to auto-discover context files by pattern. Only applicable in _index.md files.",
+      "description": "Configuration for index.md to auto-discover context files by pattern. Only applicable in index.md files.",
       "properties": {
         "patterns": {
           "type": "array",

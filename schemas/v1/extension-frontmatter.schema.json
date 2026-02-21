@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://projectstandard.dev/schemas/v1/extension-frontmatter.schema.json",
   "title": "Extension Frontmatter",
-  "description": "Validates the YAML frontmatter of extension manifest files in .project/extensions/. Extensions are plugins that provide additional instructions, agents, hooks, and MCP server configurations. The _index.md file may also declare marketplace registries.",
+  "description": "Validates the YAML frontmatter of extension manifest files in .project/extensions/. Extensions are plugins that provide additional instructions, agents, hooks, and MCP server configurations. The index.md file may also declare marketplace registries.",
   "type": "object",
   "allOf": [
     { "$ref": "common/catalog-entry.schema.json" }
@@ -60,7 +60,7 @@
     },
     "registries": {
       "type": "array",
-      "description": "Marketplace registries for discovering and installing extensions. Typically used in _index.md.",
+      "description": "Marketplace registries for discovering and installing extensions. Typically used in index.md.",
       "items": {
         "type": "object",
         "properties": {
