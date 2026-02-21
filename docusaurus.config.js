@@ -10,8 +10,8 @@ const config = {
     v4: true,
   },
 
-  url: 'https://difflabai.github.io',
-  baseUrl: '/protocols/',
+  url: 'https://protocols.difflab.ai',
+  baseUrl: '/',
 
   organizationName: 'difflabai',
   projectName: 'protocols',

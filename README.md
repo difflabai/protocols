@@ -11,4 +11,4 @@ npm start
 
 The site is built with [Docusaurus](https://docusaurus.io/) and deployed to GitHub Pages automatically on push to `main`.
 
-**Live site**: https://difflabai.github.io/protocols/
+**Live site**: https://protocols.difflab.ai
