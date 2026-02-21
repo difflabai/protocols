@@ -112,7 +112,7 @@ Every component separates description from content using a three-tier loading mo
 
 **The `description` field** SHOULD explain both what the item contains AND when it should be loaded (usage triggers). This dual purpose allows tools to match items to the current context without loading the full content.
 
-**Content is never loaded eagerly** except for items marked `activation: always` (such as `defaults.md`) and the `PROJECT.md` manifest.
+**Content is never loaded eagerly** except for items marked `activation: always` (such as `index.md`) and the `PROJECT.md` manifest.
 
 ### 3.3 Context vs Resources
 
@@ -134,7 +134,7 @@ The standard distinguishes between two categories of linked content:
 The standard follows predictable conventions to minimize required configuration:
 
 - File names serve as identifiers when `name` is not specified in frontmatter.
-- Files prefixed with `_` have special meaning (`defaults.md`, `index.md`, `local.md`).
+- Files prefixed with `_` have special meaning (`index.md`, `index.md`, `local.md`).
 - Subdirectories within a system directory provide organizational grouping.
 - Default behaviors are always the most common use case.
 
@@ -158,7 +158,7 @@ A conforming `.project/` directory MUST contain a `PROJECT.md` file. All other d
   PROJECT.md                         # [REQUIRED] Project manifest
 
   instructions/                      # [OPTIONAL] Project instructions
-    defaults.md                     #   Base instructions (always loaded)
+    index.md                     #   Base instructions (always loaded)
     <topic>.md                       #   Domain-specific instructions
     local.md                        #   Personal overrides (gitignored)
 
@@ -218,7 +218,7 @@ The root directory MUST be named `.project`. The leading dot follows the establi
 - File names SHOULD use lowercase kebab-case (e.g., `auth-refactor.md`, `staging-environment.md`).
 - Files prefixed with `_` (underscore) have special semantics defined by this specification:
   - `index.md` --- Optional directory catalog and overview.
-  - `defaults.md` --- Content that is always loaded (activation: always implied).
+  - `index.md` --- Content that is always loaded (activation: always implied).
   - `local.md` --- Personal overrides that MUST be gitignored.
 - Files with a `.local.md` suffix SHOULD be gitignored.
 
@@ -452,9 +452,9 @@ the `domain/` package with no external dependencies...
 
 ### 6.5 Special Files
 
-#### `defaults.md`
+#### `index.md`
 
-The `defaults.md` file, if present, MUST be treated as having `activation: always` regardless of its frontmatter. It contains base instructions that apply to all interactions.
+The `index.md` file, if present, MUST be treated as having `activation: always` regardless of its frontmatter. It contains base instructions that apply to all interactions.
 
 ```markdown
 ---
@@ -507,7 +507,7 @@ When instructions conflict, the higher-priority instruction wins. Implementors S
 
 | `.project` | Claude Code | Codex | Cursor | AGENTS.md |
 |------------|------------|-------|--------|-----------|
-| `instructions/defaults.md` | Root `CLAUDE.md` | Root `AGENTS.md` | `.cursorrules` | Root `AGENTS.md` |
+| `instructions/index.md` | Root `CLAUDE.md` | Root `AGENTS.md` | `.cursorrules` | Root `AGENTS.md` |
 | `instructions/<topic>.md` | `.claude/rules/<topic>.md` | Subdirectory `AGENTS.md` | `.cursor/rules/<topic>.mdc` | Subdirectory `AGENTS.md` |
 | `instructions/local.md` | `.claude/settings.local.json` | N/A | N/A | N/A |
 | `applies_to` | `globs` in `.claude/rules/` | Directory scoping | `globs` in `.cursor/rules/` | Directory scoping |
@@ -1678,7 +1678,7 @@ If the working directory is `/repo/services/api/`, the merge order is:
 
 | System | Merge Behavior |
 |--------|---------------|
-| `instructions/` | Child instructions override parent instructions with the same `name`. New instructions are added. `defaults.md` from each level is loaded (child after parent). |
+| `instructions/` | Child instructions override parent instructions with the same `name`. New instructions are added. `index.md` from each level is loaded (child after parent). |
 | `memory/` | Merged. Child entries with the same `name` override parent entries. |
 | `conversations/` | Not merged. Each `.project/` has its own conversations. |
 | `context/` | Merged. Child `auto_include` patterns override parent patterns. |
@@ -1814,7 +1814,7 @@ PROCEDURE LoadProject(working_directory):
          BUILD catalog: [{name, description, ...metadata}] per item
 
   // Phase 4: Always-On Loading (Tier 2, immediate)
-  7. IF instructions/defaults.md exists:
+  7. IF instructions/index.md exists:
        LOAD full body
   8. FOR EACH item with activation: always:
        LOAD full body
@@ -1858,7 +1858,7 @@ Implementors SHOULD respect the following token budget guidelines:
 |-------|--------|-------|
 | Tier 1 Catalog (all items) | < 5,000 tokens | ~50-100 tokens per item |
 | PROJECT.md body | < 2,000 tokens | Loaded eagerly |
-| `defaults.md` body | < 3,000 tokens | Loaded eagerly |
+| `index.md` body | < 3,000 tokens | Loaded eagerly |
 | Individual Tier 2 item | < 5,000 tokens | Per activated item |
 | Total Tier 2 | < 50,000 tokens | All activated items combined |
 | Tier 3 | Unbounded | Loaded on demand, user-approved |
@@ -2200,7 +2200,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Claude Code Equivalent |
 |------------|----------------------|
 | `PROJECT.md` | `.claude/settings.json` + root `CLAUDE.md` |
-| `instructions/defaults.md` | Root `CLAUDE.md` |
+| `instructions/index.md` | Root `CLAUDE.md` |
 | `instructions/<topic>.md` | `.claude/rules/<topic>.md` |
 | `instructions/local.md` | `.claude/settings.local.json` |
 | `instructions.applies_to` | `.claude/rules/*.md` `globs` field |
@@ -2214,7 +2214,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Codex Equivalent |
 |------------|-----------------|
 | `PROJECT.md` | Root `AGENTS.md` header |
-| `instructions/defaults.md` | Root `AGENTS.md` body |
+| `instructions/index.md` | Root `AGENTS.md` body |
 | `instructions/<topic>.md` | Subdirectory `AGENTS.md` |
 | `instructions.applies_to` | Directory-scoped `AGENTS.md` |
 
@@ -2223,7 +2223,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | Cursor Equivalent |
 |------------|------------------|
 | `PROJECT.md` | `.cursor/config.json` |
-| `instructions/defaults.md` | `.cursorrules` |
+| `instructions/index.md` | `.cursorrules` |
 | `instructions/<topic>.md` | `.cursor/rules/<topic>.mdc` |
 | `instructions.applies_to` | `.cursor/rules/*.mdc` `globs` field |
 | `context/` | `@docs`, `@files` |
@@ -2234,7 +2234,7 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `.project/` | AGENTS.md Equivalent |
 |------------|---------------------|
 | `PROJECT.md` | Top-level `AGENTS.md` metadata |
-| `instructions/defaults.md` | Root `AGENTS.md` body |
+| `instructions/index.md` | Root `AGENTS.md` body |
 | `instructions/<topic>.md` | Subdirectory `AGENTS.md` files |
 | `instructions.applies_to` | Directory scoping |
 
