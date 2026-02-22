@@ -106,7 +106,7 @@ The standard distinguishes between two categories of linked content:
 The standard follows predictable conventions to minimize required configuration:
 
 - File names serve as identifiers when `name` is not specified in frontmatter.
-- Files prefixed with `_` have special meaning (`index.md`, `index.md`, `local.md`).
+- `index.md` and `local.md` are reserved filenames with special semantics.
 - Subdirectories within a system directory provide organizational grouping.
 - Default behaviors are always the most common use case.
 
@@ -195,17 +195,12 @@ A conforming `.project/` (or `.aiproject/`) directory MUST contain a `PROJECT.md
     on-session-end.sh                #   Executed at session teardown
 ```
 
-### 4.1 Directory Naming
-
-The root directory MUST be named `.project`. The leading dot follows the established convention for tool configuration directories (`.git/`, `.github/`, `.vscode/`).
-
 ### 4.2 File Naming Conventions
 
 - All markdown files within `.project/` MUST use the `.md` extension.
 - File names SHOULD use lowercase kebab-case (e.g., `auth-refactor.md`, `staging-environment.md`).
-- Files prefixed with `_` (underscore) have special semantics defined by this specification:
-  - `index.md` --- Optional directory catalog and overview.
-  - `index.md` --- Content that is always loaded (activation: always implied).
+- The following filenames have special semantics defined by this specification:
+  - `index.md` --- Directory catalog, overview, and always-loaded content.
   - `local.md` --- Personal overrides that MUST be gitignored.
 - Files with a `.local.md` suffix SHOULD be gitignored.
 
@@ -1871,6 +1866,10 @@ Implementors SHOULD validate the following security invariants:
 2. Files matching sensitive patterns are listed in `.gitignore`.
 3. Extension permissions do not exceed what the extension's `description` and `provides` fields justify.
 
+### 18.7 Hook Execution Security
+
+Hook scripts (`hooks/on-session-start.sh`, `hooks/on-session-end.sh`) execute arbitrary shell commands and pose an inherent security risk when a repository is cloned from an untrusted source. Implementors MUST require explicit user consent before executing any hook script. Implementors SHOULD clearly present the hook script path to the user and allow them to inspect or skip execution.
+
 ---
 
 ## 19. Loading Protocol
@@ -1915,6 +1914,8 @@ PROCEDURE LoadProject(working_directory):
            SCAN all *.md files in directory (including subdirectories)
            READ only frontmatter from each file
          BUILD catalog: [{name, description, ...metadata}] per item
+           // Note: conversations use title→name, summary→description;
+           //        tasks use title→name. name defaults to filename when absent.
 
   // Phase 4: Always-On Loading (Tier 2, immediate)
   7. IF instructions/index.md exists:
@@ -1950,7 +1951,8 @@ PROCEDURE LoadProject(working_directory):
 
   // Phase 9: Session Lifecycle
   13. IF hooks/on-session-start.sh exists:
-        EXECUTE hook script
+        PROMPT user for consent (see Section 18.7)
+        IF approved: EXECUTE hook script
 ```
 
 ### 19.2 Token Budgets

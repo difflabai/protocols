@@ -106,7 +106,7 @@
       "properties": {
         "default_format": {
           "type": "string",
-          "description": "Default format for conversation files (e.g., markdown, yaml, jsonl, provider-native)."
+          "description": "Default format for conversation files (e.g., markdown, jsonl, provider-native)."
         }
       },
       "additionalProperties": true

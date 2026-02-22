@@ -1,7 +1,9 @@
 # .project local and secret files
-.project/instructions/local.md
+.project/local.md
+.project/**/local.md
+.project/**/*.local.md
+.project/**/*.secret.*
 .project/users/*.local.md
-*.secret.*
 
 # OS files
 .DS_Store

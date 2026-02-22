@@ -4,12 +4,12 @@
   "title": "Catalog Entry",
   "description": "Shared base schema for any .project item that has a name and description. Used for Tier 1 progressive disclosure — these two fields are scanned at session startup to build the item catalog.",
   "type": "object",
-  "required": ["name", "description"],
+  "required": [],
   "properties": {
     "name": {
       "type": "string",
       "maxLength": 64,
-      "description": "Short identifier for this item. Used in catalogs and references."
+      "description": "Short identifier for this item. Defaults to filename without extension when not specified."
     },
     "description": {
       "type": "string",

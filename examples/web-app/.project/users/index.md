@@ -5,14 +5,11 @@ description: >
   understanding team roles, or configuring per-user overrides.
 roles:
   lead:
-    description: Technical lead with full project configuration access.
-    permissions: [read, write, configure, approve]
+    permissions: { read: ["**"], write: ["**"], manage: true }
   engineer:
-    description: Team member with standard development access.
-    permissions: [read, write]
+    permissions: { read: ["**"], write: ["server/**", "client/**"] }
   reviewer:
-    description: Code reviewer with read access and review capabilities.
-    permissions: [read, review]
+    permissions: { read: ["**"], write: [] }
 conflict_resolution: last-writer-wins
 ---
 
