@@ -5,6 +5,7 @@ description: >
   on a problem, exploring unconventional approaches, or brainstorming.
 tools: [read_file, search]
 tags: [creativity, ideation, problem-solving]
+version: "1.0.0"
 ---
 
 # DreamSolve

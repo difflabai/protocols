@@ -46,7 +46,8 @@ Add more as needed:
   resources/              # External links (dashboards, deployments)
   tasks/                  # A2A-compatible task management
   agents/                 # Agent definitions
-  extensions/             # Plugins, governance, compliance
+  skills/                 # Invocable commands and workflows
+  extensions/             # Structural additions
 ```
 
 ## Design Principles

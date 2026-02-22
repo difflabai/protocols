@@ -174,8 +174,13 @@ A conforming `.project/` (or `.aiproject/`) directory MUST contain a `PROJECT.md
     index.md                        #   Agent catalog
     <agent>.md                       #   Individual agent definitions
 
-  extensions/                        # [OPTIONAL] Plugins and compliance
-    index.md                        #   Registry and marketplace config
+  skills/                            # [OPTIONAL] Invocable commands/workflows
+    index.md                        #   Skill catalog and marketplace registries
+    <skill>/                        #   Skill directories
+      index.md                      #   Skill prompt and metadata
+
+  extensions/                        # [OPTIONAL] Structural additions
+    index.md                        #   Installed extension catalog
     <extension>/                     #   Extension directories
 
   adapters/                          # [OPTIONAL] Provider-specific mappings
@@ -253,8 +258,8 @@ Implementors MUST load `PROJECT.md` in full (both frontmatter and body) at sessi
 | `license` | string | SPDX license identifier. |
 | `repository` | object | Repository metadata. See [5.3](#53-repository-object). |
 | `providers` | object | Provider preferences. See [5.4](#54-providers-object). |
-| `agents_md` | object | AGENTS.md reconciliation config. See [Section 19](#19-agentsmd-reconciliation). |
-| `hierarchy` | object | Hierarchical override config. See [Section 16](#16-hierarchical-override). |
+| `agents_md` | object | AGENTS.md reconciliation config. See [Section 20](#20-agentsmd-reconciliation). |
+| `hierarchy` | object | Hierarchical override config. See [Section 17](#17-hierarchical-override). |
 | `conversations` | object | Conversation system config. See [Section 8](#8-conversations-system). |
 
 ### 5.3 Repository Object
@@ -454,7 +459,7 @@ description: Base project instructions that always apply.
 
 #### `local.md`
 
-The `local.md` file contains personal instruction overrides. It MUST be listed in `.gitignore` (see [Section 20](#20-gitignore-conventions)). It is loaded after all other instructions at the highest priority, allowing individual developers to customize behavior without affecting the team.
+The `local.md` file contains personal instruction overrides. It MUST be listed in `.gitignore` (see [Section 21](#21-gitignore-conventions)). It is loaded after all other instructions at the highest priority, allowing individual developers to customize behavior without affecting the team.
 
 ```markdown
 ---
@@ -604,7 +609,7 @@ feature specifications, and business rule definitions. Navigate to the
 "Current Sprint" section for active work items.
 ```
 
-When a memory file includes `type: url`, the URL content becomes the Tier 3 data. The file body provides context and navigation hints. See [Section 17](#17-security-model) for auth handling.
+When a memory file includes `type: url`, the URL content becomes the Tier 3 data. The file body provides context and navigation hints. See [Section 18](#18-security-model) for auth handling.
 
 ### 7.6 Entity Subdirectory
 
@@ -889,7 +894,7 @@ mime_type: application/yaml
 | `url` | string | URL to fetch content from. |
 | `refresh` | string | Cache refresh interval: `session`, `daily`, `weekly`, `manual`. Default: `session`. |
 | `mime_type` | string | MIME type of the content. Helps implementors handle the content correctly. |
-| `auth` | object | Authentication configuration. See [Section 17](#17-security-model). |
+| `auth` | object | Authentication configuration. See [Section 18](#18-security-model). |
 
 ### 9.6 Loading Behavior
 
@@ -1308,101 +1313,63 @@ The agent body contains the agent's **system instructions** --- the prompt conte
 
 ---
 
-## 13. Extensions System
+## 13. Skills System
 
 ### 13.1 Purpose
 
-The `extensions/` directory provides a plugin system for adding reusable functionality to a `.project/` directory. Extensions can provide skills, instructions, agents, hooks, and validation rules that are packaged for sharing across projects.
+The `skills/` directory defines invocable commands and workflows. Skills differ from agents: an agent is a persistent role with broad capabilities (code reviewer, security auditor); a skill is a focused, task-oriented command (commit, generate-tests, scan-vulnerabilities).
 
-Use extensions for:
-- Reusable skills (invocable commands and workflows)
-- Compliance rules (SOC2, HIPAA, GDPR)
-- Organization-wide coding standards
-- Industry-specific patterns
-- Shared agent definitions
-- Custom validation and linting
+Use skills for:
+- Reusable commands and workflows
+- Automated development tasks
+- Team-shared tooling invoked on demand
+- Marketplace-distributed capabilities
 
-### 13.2 Registry Configuration
+This is analogous to:
+- Claude Code's custom skills (`.claude/skills/`)
+- Reusable slash commands across AI tools
 
-The `index.md` file configures extension registries (marketplaces) and lists installed extensions:
+### 13.2 Directory Structure
+
+```
+skills/
+  index.md                    # Skill catalog and marketplace registries
+  <skill-name>/               # Individual skill directories
+    index.md                   # Skill prompt and metadata
+    <supporting-files>         # Optional scripts, templates, resources
+```
+
+### 13.3 Marketplace Configuration
+
+The `index.md` file catalogs installed skills and configures marketplace registries for discovering new ones:
 
 ```markdown
 ---
-name: extensions
-description: Installed extensions and marketplace configuration.
+name: skills
+description: Invocable commands and marketplace configuration.
 registries:
-  - id: public
-    url: https://registry.projectstandard.dev/v1
+  - id: difflabai
+    url: https://github.com/difflabai/marketplace
   - id: company
-    url: https://extensions.acme-corp.com/v1
+    url: https://skills.acme-corp.com/v1
     auth:
       type: bearer
-      token_env: ACME_REGISTRY_TOKEN
+      token_env: ACME_SKILLS_TOKEN
 ---
 
-# Extensions
+# Skills
 
 ## Installed
 
-- **soc2-compliance** v1.2.0 --- SOC2 compliance rules and audit checks
-- **acme-standards** v3.0.1 --- Acme Corp engineering standards
+- **pde** v1.0.0 --- Product development workflow
+- **dreamsolve** v1.0.0 --- Creative problem-solving
 ```
 
-Registries are the vendor-neutral equivalent of provider marketplace configurations. Adapters (Section 14) map these to provider-native formats (e.g., Claude Code's `marketplace.json`).
+Registries are the vendor-neutral equivalent of provider marketplace configurations. Adapters (Section 15) map registries to provider-native formats (e.g., Claude Code's `marketplace.json`).
 
-### 13.3 Extension Manifest
+### 13.4 Skill Format
 
-Each installed extension has a directory containing its own manifest:
-
-```markdown
----
-name: soc2-compliance
-version: "1.2.0"
-description: >
-  SOC2 Type II compliance rules. Adds security-focused instructions,
-  audit logging requirements, and access control validation.
-author: Project Standard Community
-license: Apache-2.0
-provides:
-  skills: [security-scan]
-  instructions: [security-baseline, audit-logging, access-control]
-  agents: [security-auditor]
-permissions:
-  read: ["**"]
-  write: []
-  tools: [read_file, search]
----
-
-# SOC2 Compliance Extension
-
-This extension provides security-focused instructions and an automated
-security auditor agent aligned with SOC2 Type II requirements.
-
-## What It Adds
-
-- **security-baseline**: Baseline security instructions for all code
-- **audit-logging**: Requirements for audit log instrumentation
-- **access-control**: Access control validation rules
-- **security-auditor**: Agent that reviews code for SOC2 compliance
-```
-
-### 13.4 Skill Manifests
-
-A **skill** is an invocable command or workflow provided by an extension. Skills differ from agents: an agent is a persistent role with broad capabilities (code reviewer, security auditor); a skill is a focused, task-oriented command (commit, generate-tests, scan-vulnerabilities).
-
-Each skill has its own directory under the extension:
-
-```
-extensions/
-  <extension-name>/
-    index.md                   # Extension manifest (provides: skills: [...])
-    skills/
-      <skill-name>/
-        index.md               # Skill prompt and metadata
-        <supporting-files>     # Optional scripts, templates, resources
-```
-
-Skill `index.md` format:
+Each skill has its own directory containing an `index.md` with frontmatter metadata and a body containing the skill prompt:
 
 ```markdown
 ---
@@ -1427,19 +1394,112 @@ You are a security scanning assistant. Analyze the codebase for:
 Report findings in severity order (critical, high, medium, low).
 ```
 
-#### Skill Frontmatter Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | REQUIRED | Skill identifier. |
-| `description` | string | REQUIRED | What the skill does and when to invoke it. |
-| `tools` | string[] | Optional | Tools the skill uses. |
-| `mcp_servers` | string[] | Optional | MCP servers required. |
-| `tags` | string[] | Optional | Categorical tags. |
-
-The skill body contains the **prompt** --- the instructions executed when the skill is invoked. This is loaded as Tier 2 content on invocation.
-
 ### 13.5 Frontmatter Fields
+
+#### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Skill identifier. |
+| `description` | string | What the skill does and when to invoke it. |
+
+#### Optional Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tools` | string[] | Tools the skill uses. |
+| `mcp_servers` | string[] | MCP servers required by this skill. |
+| `tags` | string[] | Categorical tags. |
+| `version` | string | Skill version (semver recommended). |
+
+### 13.6 Body Content
+
+The skill body contains the **prompt** --- the instructions executed when the skill is invoked. Supporting files (scripts, templates) MAY be placed alongside `index.md` in the skill directory.
+
+### 13.7 Loading Behavior
+
+- **Tier 1**: Skill frontmatter scanned to build a catalog (name, description, tags).
+- **Tier 2**: Full skill prompt loaded when the skill is invoked.
+- **Tier 3**: Supporting files and referenced resources loaded during execution.
+
+### 13.8 Mapping to Existing Standards
+
+| `.project` | Claude Code | Codex | Cursor |
+|------------|------------|-------|--------|
+| `skills/` | `.claude/skills/` | N/A | N/A |
+| `skills/index.md` registries | `.claude/marketplace.json` | N/A | N/A |
+| Skill `name` | SKILL.md filename | N/A | N/A |
+| Skill body | SKILL.md content | N/A | N/A |
+
+---
+
+## 14. Extensions System
+
+### 14.1 Purpose
+
+The `extensions/` directory describes structural additions to the `.project/` directory. An extension defines a new directory or content type within `.project/` and documents its expected structure and content.
+
+Use extensions for:
+- Defining custom `.project/` directories (e.g., `guidance/`, `runbooks/`)
+- Compliance requirements that add structural expectations
+- Organization-wide structural standards
+- Documenting non-standard content types within the project
+
+### 14.2 Extension Index
+
+The `index.md` file lists installed extensions:
+
+```markdown
+---
+name: extensions
+description: Structural extensions installed in this project.
+---
+
+# Extensions
+
+## Installed
+
+- **soc2-compliance** v1.2.0 --- Adds security audit structure and compliance checklists
+- **acme-standards** v3.0.1 --- Acme Corp engineering standards and directory conventions
+```
+
+### 14.3 Extension Manifest
+
+Each installed extension has a directory containing its own manifest:
+
+```markdown
+---
+name: soc2-compliance
+version: "1.2.0"
+description: >
+  SOC2 Type II compliance rules. Adds security-focused instructions,
+  audit logging requirements, and access control validation.
+author: Project Standard Community
+license: Apache-2.0
+provides:
+  directories: [audit-logs, compliance-reports]
+  instructions: [security-baseline, audit-logging, access-control]
+  agents: [security-auditor]
+permissions:
+  read: ["**"]
+  write: []
+  tools: [read_file, search]
+---
+
+# SOC2 Compliance Extension
+
+This extension provides security-focused instructions and an automated
+security auditor agent aligned with SOC2 Type II requirements.
+
+## What It Adds
+
+- **security-baseline**: Baseline security instructions for all code
+- **audit-logging**: Requirements for audit log instrumentation
+- **access-control**: Access control validation rules
+- **security-auditor**: Agent that reviews code for SOC2 compliance
+```
+
+### 14.4 Frontmatter Fields
 
 #### Required Fields
 
@@ -1455,31 +1515,29 @@ The skill body contains the **prompt** --- the instructions executed when the sk
 |-------|------|-------------|
 | `author` | string | Extension author or organization. |
 | `license` | string | SPDX license identifier. |
-| `provides` | object | What the extension contributes (skills, instructions, agents, hooks, mcp_servers). |
+| `provides` | object | What the extension contributes (directories, instructions, agents). |
 | `permissions` | object | Permissions the extension requires. |
 | `dependencies` | object | Other extensions this one depends on. |
 
-### 13.6 Loading Behavior
+### 14.5 Loading Behavior
 
-- **Tier 1**: Extension manifests are scanned. The `provides` field tells the system what additional skills, instructions, and agents are available.
-- **Tier 2**: Extension-provided skills, instructions, and agents are loaded using the same activation rules as project-level items. Skill prompts are loaded when the skill is invoked.
-- **Tier 3**: Extension resources and skill supporting files loaded on demand.
+- **Tier 1**: Extension manifests are scanned. The `provides` field tells the system what additional directories, instructions, and agents are available.
+- **Tier 2**: Extension-provided instructions and agents are loaded using the same activation rules as project-level items.
+- **Tier 3**: Extension resources loaded on demand.
 
 Extension-provided items SHOULD have lower priority than project-level items, allowing projects to override extension defaults.
 
-### 13.7 Mapping to Existing Standards
+### 14.6 Mapping to Existing Standards
 
 | `.project` | Claude Code | Codex | Cursor |
 |------------|------------|-------|--------|
 | `extensions/` | `.claude/plugins/` | N/A | N/A |
-| Extension skills | `.claude/skills/` | N/A | N/A |
-| Extension registries | `.claude/marketplace.json` | N/A | N/A |
 
 ---
 
-## 14. Adapters System
+## 15. Adapters System
 
-### 14.1 Purpose
+### 15.1 Purpose
 
 The `adapters/` directory contains provider-specific mapping files that describe how `.project/` content maps to native tool formats. Adapters enable bidirectional synchronization between `.project/` and provider-specific directories.
 
@@ -1488,7 +1546,7 @@ Use adapters when:
 - Team members use different tools and need consistent configuration
 - Automating the generation of provider-native config from `.project/`
 
-### 14.2 File Format
+### 15.2 File Format
 
 ```markdown
 ---
@@ -1533,7 +1591,7 @@ Agent definitions generate `.claude/agents/<name>.md` files with
 Claude-specific formatting for custom commands.
 ```
 
-### 14.3 Frontmatter Fields
+### 15.3 Frontmatter Fields
 
 #### Required Fields
 
@@ -1550,7 +1608,7 @@ Claude-specific formatting for custom commands.
 | `mapping` | object | How each `.project/` system maps to native format. |
 | `sync` | string | Sync direction: `generate` (`.project/` to native), `import` (native to `.project/`), `bidirectional`. Default: `generate`. |
 
-### 14.4 Mapping Object
+### 15.4 Mapping Object
 
 Each key in `mapping` corresponds to a `.project/` system directory:
 
@@ -1563,7 +1621,7 @@ mapping:
     template: <path>       # Optional template for generation
 ```
 
-### 14.5 Loading Behavior
+### 15.5 Loading Behavior
 
 Adapters are NOT loaded during normal AI sessions. They are configuration for tooling that synchronizes `.project/` with provider-native formats. Implementors MAY use adapter definitions to:
 
@@ -1571,7 +1629,7 @@ Adapters are NOT loaded during normal AI sessions. They are configuration for to
 - Import native configuration into `.project/` format.
 - Keep both formats synchronized on file changes.
 
-### 14.6 Mapping to Existing Standards
+### 15.6 Mapping to Existing Standards
 
 | `.project` Adapter | Generates |
 |-------------------|-----------|
@@ -1582,13 +1640,13 @@ Adapters are NOT loaded during normal AI sessions. They are configuration for to
 
 ---
 
-## 15. Multi-User System
+## 16. Multi-User System
 
-### 15.1 Purpose
+### 16.1 Purpose
 
 The `users/` directory supports multi-user projects where different team members need different configurations, permissions, or preferences.
 
-### 15.2 User Index
+### 16.2 User Index
 
 The `index.md` file defines roles and team configuration:
 
@@ -1616,7 +1674,7 @@ conflict_resolution: last-writer-wins
 - **reviewer**: Read-only access for code review
 ```
 
-### 15.3 Frontmatter Fields
+### 16.3 Frontmatter Fields
 
 #### Optional Fields (in `index.md`)
 
@@ -1626,7 +1684,7 @@ conflict_resolution: last-writer-wins
 | `default_role` | string | Role assigned to unspecified users. |
 | `conflict_resolution` | string | Strategy for concurrent edits: `last-writer-wins`, `merge`, `lock`. Default: `last-writer-wins`. |
 
-### 15.4 Per-User Override Files
+### 16.4 Per-User Override Files
 
 Individual users create `<username>.local.md` files for personal overrides:
 
@@ -1647,9 +1705,9 @@ custom_instructions: |
 Personal notes and preferences that override team defaults.
 ```
 
-Per-user files with the `.local.md` suffix MUST be listed in `.gitignore` (see [Section 20](#20-gitignore-conventions)). They are loaded only when the corresponding user is identified in the current session.
+Per-user files with the `.local.md` suffix MUST be listed in `.gitignore` (see [Section 21](#21-gitignore-conventions)). They are loaded only when the corresponding user is identified in the current session.
 
-### 15.5 User Identification
+### 16.5 User Identification
 
 This specification does not mandate a user identification mechanism. Implementors MAY identify the current user via:
 - Environment variables (e.g., `USER`, `LOGNAME`)
@@ -1657,7 +1715,7 @@ This specification does not mandate a user identification mechanism. Implementor
 - Provider-specific authentication
 - Explicit session configuration
 
-### 15.6 Loading Behavior
+### 16.6 Loading Behavior
 
 - **Tier 1**: `index.md` frontmatter loaded to understand roles and policies.
 - **Tier 2**: Current user's `.local.md` file loaded at session startup.
@@ -1665,13 +1723,13 @@ This specification does not mandate a user identification mechanism. Implementor
 
 ---
 
-## 16. Hierarchical Override
+## 17. Hierarchical Override
 
-### 16.1 Purpose
+### 17.1 Purpose
 
 `.project/` directories can nest within a repository to support monorepo structures. A child `.project/` directory inherits from and overrides its ancestors, providing scoped configuration for sub-projects.
 
-### 16.2 Discovery
+### 17.2 Discovery
 
 When an implementor starts a session, it MUST:
 
@@ -1679,7 +1737,7 @@ When an implementor starts a session, it MUST:
 2. Walk up the directory tree until a `.project/PROJECT.md` is found or the filesystem root is reached.
 3. If the found `PROJECT.md` has `hierarchy.inherit: true`, continue walking up to discover parent `.project/` directories.
 
-### 16.3 Configuration
+### 17.3 Configuration
 
 Hierarchical behavior is configured in `PROJECT.md`:
 
@@ -1690,7 +1748,7 @@ hierarchy:
   max_depth: 3            # Maximum ancestor levels to traverse
 ```
 
-### 16.4 Merge Strategies
+### 17.4 Merge Strategies
 
 | Strategy | Behavior |
 |----------|----------|
@@ -1698,7 +1756,7 @@ hierarchy:
 | `deep-merge` | Child values are deep-merged with parent values. Arrays are concatenated; objects are merged recursively. |
 | `replace` | Child `.project/` completely replaces parent. No inheritance. |
 
-### 16.5 Merge Order
+### 17.5 Merge Order
 
 When multiple `.project/` directories are in scope, they are merged in order from most distant ancestor to nearest descendant. The nearest (most specific) `.project/` has the highest priority.
 
@@ -1713,7 +1771,7 @@ If the working directory is `/repo/services/api/`, the merge order is:
 1. `/repo/.project/` (base)
 2. `/repo/services/api/.project/` (override)
 
-### 16.6 Per-System Merge Behavior
+### 17.6 Per-System Merge Behavior
 
 | System | Merge Behavior |
 |--------|---------------|
@@ -1724,14 +1782,15 @@ If the working directory is `/repo/services/api/`, the merge order is:
 | `resources/` | Merged. Child entries with the same `name` override parent entries. |
 | `tasks/` | Not merged. Tasks belong to their specific `.project/` level. |
 | `agents/` | Merged. Child agents with the same `name` override parent definitions. |
+| `skills/` | Merged. Child skills with the same `name` override parent definitions. |
 | `extensions/` | Merged. Child extensions are added to parent extensions. |
 | `adapters/` | Child adapters override parent adapters for the same provider. |
 
 ---
 
-## 17. Security Model
+## 18. Security Model
 
-### 17.1 Principles
+### 18.1 Principles
 
 The `.project/` security model follows these principles:
 
@@ -1740,7 +1799,7 @@ The `.project/` security model follows these principles:
 3. **Gitignore by convention**: Sensitive files follow naming patterns that are gitignored.
 4. **Minimal permissions**: Extensions and agents declare required permissions explicitly.
 
-### 17.2 Secret References
+### 18.2 Secret References
 
 When a field requires a secret value (API tokens, passwords, keys), it MUST use an environment variable reference:
 
@@ -1766,7 +1825,7 @@ auth:
 
 The `_env` suffix convention indicates the field value is an environment variable name, not the secret itself. Implementors MUST resolve these by reading the named environment variable at runtime.
 
-### 17.3 Auth Object
+### 18.3 Auth Object
 
 The `auth` object is used in memory, context, and extension registry configurations:
 
@@ -1779,7 +1838,7 @@ The `auth` object is used in memory, context, and extension registry configurati
 | `header` | string | Custom header name (header auth). |
 | `value_env` | string | Environment variable for header value. |
 
-### 17.4 File-Level Security
+### 18.4 File-Level Security
 
 Files with these naming patterns MUST be treated as sensitive:
 
@@ -1789,9 +1848,9 @@ Files with these naming patterns MUST be treated as sensitive:
 | `*.local.md` | Per-user configurations |
 | `*.secret.*` | Any file marked as secret |
 
-These patterns MUST be included in `.gitignore` (see [Section 20](#20-gitignore-conventions)).
+These patterns MUST be included in `.gitignore` (see [Section 21](#21-gitignore-conventions)).
 
-### 17.5 Extension Sandboxing
+### 18.5 Extension Sandboxing
 
 Extensions MUST declare their required permissions in their manifest frontmatter:
 
@@ -1804,7 +1863,7 @@ permissions:
 
 Implementors SHOULD enforce extension permissions when the tool platform supports it. At minimum, implementors MUST present extension permissions to the user for review when installing extensions.
 
-### 17.6 Validation Rules
+### 18.6 Validation Rules
 
 Implementors SHOULD validate the following security invariants:
 
@@ -1814,11 +1873,11 @@ Implementors SHOULD validate the following security invariants:
 
 ---
 
-## 18. Loading Protocol
+## 19. Loading Protocol
 
 This section defines the **normative algorithm** that implementors MUST follow when loading a `.project/` directory. This is the core interoperability contract of the specification.
 
-### 18.1 Algorithm
+### 19.1 Algorithm
 
 ```
 PROCEDURE LoadProject(working_directory):
@@ -1848,7 +1907,7 @@ PROCEDURE LoadProject(working_directory):
 
   // Phase 3: Catalog Building (Tier 1)
   6. FOR EACH system_directory IN [instructions, memory, conversations,
-       context, resources, tasks, agents, extensions]:
+       context, resources, tasks, agents, skills, extensions]:
        IF system_directory exists:
          IF index.md exists AND has catalog in frontmatter:
            USE frontmatter catalog entries
@@ -1894,7 +1953,7 @@ PROCEDURE LoadProject(working_directory):
         EXECUTE hook script
 ```
 
-### 18.2 Token Budgets
+### 19.2 Token Budgets
 
 Implementors SHOULD respect the following token budget guidelines:
 
@@ -1909,13 +1968,13 @@ Implementors SHOULD respect the following token budget guidelines:
 
 These are guidelines, not hard limits. Implementors MAY adjust based on the context window size of the underlying model.
 
-### 18.3 Caching
+### 19.3 Caching
 
 Implementors SHOULD cache Tier 1 catalogs for the duration of a session. Implementors MAY cache Tier 2 content. Cached content SHOULD be invalidated when the underlying file is modified (via filesystem watch or similar mechanism).
 
 Remote content (Tier 3 URLs) MUST be cached according to the `refresh` policy specified in the file's frontmatter.
 
-### 18.4 Error Handling
+### 19.4 Error Handling
 
 Implementors MUST handle the following error conditions gracefully:
 
@@ -1930,22 +1989,22 @@ Implementors MUST handle the following error conditions gracefully:
 
 ---
 
-## 19. AGENTS.md Reconciliation
+## 20. AGENTS.md Reconciliation
 
-### 19.1 Background
+### 20.1 Background
 
 [AGENTS.md](https://github.com/anthropics/agents-md) (Linux Foundation) is a cross-tool standard for coding agent instructions. It provides a single markdown file at the repository root with project instructions.
 
 The `.project` standard is a superset of AGENTS.md --- it provides everything AGENTS.md does plus memory, conversations, context, resources, tasks, agents, extensions, and more. This section defines how the two coexist.
 
-### 19.2 Relationship
+### 20.2 Relationship
 
 `.project/` is **primary**. When a `.project/` directory is present, it is the authoritative source of project configuration. AGENTS.md serves two purposes:
 
 1. **Pointer**: AGENTS.md can point tools to the `.project/` directory.
 2. **Fallback**: AGENTS.md content can serve as base instructions for tools that do not support `.project/`.
 
-### 19.3 Configuration
+### 20.3 Configuration
 
 AGENTS.md reconciliation is configured in `PROJECT.md`:
 
@@ -1960,7 +2019,7 @@ agents_md:
 | `pointer` | boolean | `true` | Whether AGENTS.md should point to `.project/`. |
 | `fallback` | boolean | `true` | Whether to load AGENTS.md content as base instructions. |
 
-### 19.4 Pointer Pattern
+### 20.4 Pointer Pattern
 
 When `agents_md.pointer` is `true`, the AGENTS.md file SHOULD begin with a comment pointing to `.project/`:
 
@@ -1980,25 +2039,25 @@ instructions, memory, conversations, and more.
 ...fallback instruction content for non-.project tools...
 ```
 
-### 19.5 Loading Order
+### 20.5 Loading Order
 
 When both `.project/` and AGENTS.md are present and `agents_md.fallback` is `true`:
 
-1. Load all `.project/instructions/` per the Loading Protocol (Section 18).
+1. Load all `.project/instructions/` per the Loading Protocol (Section 19).
 2. Load AGENTS.md content as an instruction with implicit priority `-1` (lowest).
 3. If any `.project/` instruction conflicts with AGENTS.md content, the `.project/` instruction wins.
 
 When `agents_md.fallback` is `false`, AGENTS.md is ignored entirely during `.project/` loading.
 
-### 19.6 Generation
+### 20.6 Generation
 
 Implementors MAY provide tooling to generate or update AGENTS.md from `.project/instructions/` content, ensuring the fallback content stays in sync with the primary instructions.
 
 ---
 
-## 20. Gitignore Conventions
+## 21. Gitignore Conventions
 
-### 20.1 Required Patterns
+### 21.1 Required Patterns
 
 A repository using `.project/` MUST include the following patterns in its `.gitignore` (or the `.project/` directory's own `.gitignore`):
 
@@ -2011,7 +2070,7 @@ A repository using `.project/` MUST include the following patterns in its `.giti
 .project/users/*.local.md
 ```
 
-### 20.2 Recommended Patterns
+### 21.2 Recommended Patterns
 
 The following patterns are RECOMMENDED:
 
@@ -2021,7 +2080,7 @@ The following patterns are RECOMMENDED:
 .project/**/.cache/
 ```
 
-### 20.3 Full Example
+### 21.3 Full Example
 
 ```gitignore
 # === .project standard ===
@@ -2047,9 +2106,9 @@ The following patterns are RECOMMENDED:
 
 ---
 
-## 21. Versioning and Migration
+## 22. Versioning and Migration
 
-### 21.1 Spec Version
+### 22.1 Spec Version
 
 The `spec` field in `PROJECT.md` frontmatter identifies the `.project` standard version:
 
@@ -2061,7 +2120,7 @@ The version string follows semantic versioning principles:
 - **Major version** changes indicate breaking changes to the directory structure, required fields, or loading protocol.
 - **Minor version** changes indicate backwards-compatible additions (new optional fields, new system directories).
 
-### 21.2 Compatibility
+### 22.2 Compatibility
 
 Implementors MUST:
 - Support the `spec` version they claim to implement.
@@ -2072,7 +2131,7 @@ Implementors SHOULD:
 - Support reading older `spec` versions when possible.
 - Provide migration tooling when breaking changes occur.
 
-### 21.3 Migration Path
+### 22.3 Migration Path
 
 When a new major version of the spec is released, the specification MUST include:
 - A detailed list of breaking changes.
@@ -2219,11 +2278,22 @@ These fields MAY appear in any `.project/` markdown file:
 | `description` | string | REQUIRED | What the extension provides. |
 | `author` | string | Optional | Author or organization. |
 | `license` | string | Optional | SPDX license. |
-| `provides` | object | Optional | What the extension contributes (skills, instructions, agents, hooks, mcp_servers). |
+| `provides` | object | Optional | What the extension contributes (directories, instructions, agents, hooks, mcp_servers). |
 | `permissions` | object | Optional | Required permissions. |
 | `dependencies` | object | Optional | Extension dependencies. |
 
-### A.12 Adapter Fields
+### A.12 Skill Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | REQUIRED | Skill identifier. |
+| `description` | string | REQUIRED | What the skill does and when to invoke it. |
+| `tools` | string[] | Optional | Tools the skill uses. |
+| `mcp_servers` | string[] | Optional | Required MCP servers. |
+| `tags` | string[] | Optional | Categorical tags. |
+| `version` | string | Optional | Skill version. |
+
+### A.13 Adapter Fields
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -2250,6 +2320,8 @@ This appendix provides a comprehensive mapping between `.project/` and existing 
 | `instructions.applies_to` | `.claude/rules/*.md` `globs` field |
 | `memory/` | Facts section of `CLAUDE.md` |
 | `agents/<agent>.md` | `.claude/agents/<agent>.md` |
+| `skills/` | `.claude/skills/` |
+| `skills/index.md` registries | `.claude/marketplace.json` |
 | `conversations/` | Claude Projects history |
 | `context/` | Claude Projects uploaded files |
 

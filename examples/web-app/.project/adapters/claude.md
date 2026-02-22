@@ -21,7 +21,7 @@ mapping:
   marketplace:
     output: "../.claude/marketplace.json"
     transform: generate
-  plugins:
+  extensions:
     output: "../.claude/plugins/"
     transform: generate
 sync: bidirectional
@@ -40,25 +40,25 @@ conventions.
 | `instructions/*.md` | `.claude/rules/*.md` | Each instruction becomes a rule |
 | `agents/*.md` | `.claude/agents/*.md` | Agent definitions mapped directly |
 | `memory/*.md` | `CLAUDE.md` | Memory entries appended to project CLAUDE.md |
-| `extensions/*/skills/*/index.md` | `.claude/skills/*/SKILL.md` | Skill prompt mapped to SKILL.md |
-| `extensions/index.md` registries | `.claude/marketplace.json` | Registry entries become marketplace config |
+| `skills/*/index.md` | `.claude/skills/*/SKILL.md` | Skill prompt mapped to SKILL.md |
+| `skills/index.md` registries | `.claude/marketplace.json` | Registry entries become marketplace config |
 | `extensions/*/index.md` | `.claude/plugins/*/` | Extension manifests become plugins |
 
 ## Skills
 
-Extension-provided skills map to `.claude/skills/<name>/SKILL.md`. The skill
-body (prompt) becomes the SKILL.md content. Supporting files in the skill
-directory are copied alongside.
+Skills in `skills/<name>/index.md` map to `.claude/skills/<name>/SKILL.md`.
+The skill body (prompt) becomes the SKILL.md content. Supporting files in
+the skill directory are copied alongside.
 
 ## Marketplace
 
-Extension registries in `extensions/index.md` map to entries in
+Marketplace registries in `skills/index.md` map to entries in
 `.claude/marketplace.json`. Each registry becomes a marketplace source
-that Claude Code can use to discover and install skills and plugins.
+that Claude Code can use to discover and install skills.
 
-## Plugins
+## Extensions
 
-Extensions that provide instructions, agents, or hooks map to
+Extensions that provide structural additions map to
 `.claude/plugins/<name>/` with a `.claude-plugin/plugin.json` manifest
 generated from the extension frontmatter.
 

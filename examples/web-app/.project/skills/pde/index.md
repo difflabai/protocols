@@ -5,6 +5,7 @@ description: >
   feature, gathering requirements, or planning implementation.
 tools: [read_file, search, write_file, grep]
 tags: [product, planning, workflow]
+version: "1.0.0"
 ---
 
 # Product Development Environment
