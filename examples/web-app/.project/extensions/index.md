@@ -1,28 +1,22 @@
 ---
 name: extensions
 description: >
-  Installed extensions and marketplace configuration. Browse to see what
-  extensions are active and where to find new ones.
+  Installed extensions and marketplace configuration. Extensions provide
+  skills, instructions, agents, and hooks from shared registries.
 registries:
-  - id: project-central
-    url: https://registry.projectstandard.dev/v1
-  - id: company-internal
-    url: https://extensions.taskflow.example.com/v1
-    auth:
-      type: bearer
-      token_env: INTERNAL_REGISTRY_TOKEN
+  - id: difflabai-marketplace
+    url: https://github.com/difflabai/marketplace
 ---
 
 # Extensions
 
-## Installed
-
-- **soc2-compliance** v1.2.0 -- SOC2 compliance rules and audit checks.
-  Validates that PRs include security considerations and that sensitive data
-  handling follows compliance requirements.
-
 ## Marketplace
 
-Extensions can be installed from the registries configured in the frontmatter.
-The `project-central` registry hosts community extensions. The
-`company-internal` registry hosts proprietary extensions for the organization.
+Extensions are installed from the [Differential AI Lab marketplace](https://github.com/difflabai/marketplace).
+
+## Installed
+
+- **pde** v1.0.0 -- Product Development Environment skill for structured
+  product development workflows.
+- **dreamsolve** v1.0.0 -- Dream-state problem solving skill that uses
+  creative ideation techniques.

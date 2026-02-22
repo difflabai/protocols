@@ -28,6 +28,11 @@
           "items": { "type": "string" },
           "description": "Agent definitions provided by this extension."
         },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Invocable skill commands provided by this extension."
+        },
         "hooks": {
           "type": "array",
           "items": { "type": "string" },

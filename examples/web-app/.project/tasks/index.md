@@ -1,25 +1,32 @@
 ---
 name: tasks
 description: >
-  Task board for tracking work items. Tasks follow A2A-compatible status
-  values. Browse to see current work in progress, blocked items, and
-  completed work.
+  Task tracking for the TaskFlow project. Tasks are managed in external
+  systems — GitHub Issues for public work items and ATS for agent-driven
+  task orchestration.
+systems:
+  - name: github-issues
+    type: github
+    url: https://github.com/difflabai/protocols/issues
+  - name: ats
+    type: ats
+    url: https://ats.example.com
+    actor:
+      type: agent
+      id: claude-code
+      name: Claude Code
 ---
 
-# Task Board
+# Task Tracking
 
-This directory tracks work items for the TaskFlow project. Tasks use
-A2A-compatible status values: `working`, `completed`, `failed`, `canceled`,
-and `input_required`.
+This project tracks tasks in two external systems.
 
-## Structure
+## GitHub Issues
 
-- **active/** -- Tasks currently in progress or awaiting input.
-- **completed/** -- Finished tasks kept for historical reference.
+Public work items, bugs, and feature requests are tracked in
+[GitHub Issues](https://github.com/difflabai/protocols/issues).
 
-## Current Status
+## ATS
 
-| Task | Title | Status | Assignee |
-|------|-------|--------|----------|
-| task-001 | Implement refresh token rotation | working | carol |
-| task-000 | Set up project infrastructure | completed | alice |
+Agent-driven task orchestration uses ATS. The Claude Code agent
+is configured as the default actor for automated task workflows.

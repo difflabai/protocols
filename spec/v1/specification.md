@@ -1312,9 +1312,10 @@ The agent body contains the agent's **system instructions** --- the prompt conte
 
 ### 13.1 Purpose
 
-The `extensions/` directory provides a plugin system for adding reusable functionality to a `.project/` directory. Extensions can provide instructions, memory, agents, and validation rules that are packaged for sharing across projects.
+The `extensions/` directory provides a plugin system for adding reusable functionality to a `.project/` directory. Extensions can provide skills, instructions, agents, hooks, and validation rules that are packaged for sharing across projects.
 
 Use extensions for:
+- Reusable skills (invocable commands and workflows)
 - Compliance rules (SOC2, HIPAA, GDPR)
 - Organization-wide coding standards
 - Industry-specific patterns
@@ -1323,7 +1324,7 @@ Use extensions for:
 
 ### 13.2 Registry Configuration
 
-The `index.md` file configures extension registries and lists installed extensions:
+The `index.md` file configures extension registries (marketplaces) and lists installed extensions:
 
 ```markdown
 ---
@@ -1347,6 +1348,8 @@ registries:
 - **acme-standards** v3.0.1 --- Acme Corp engineering standards
 ```
 
+Registries are the vendor-neutral equivalent of provider marketplace configurations. Adapters (Section 14) map these to provider-native formats (e.g., Claude Code's `marketplace.json`).
+
 ### 13.3 Extension Manifest
 
 Each installed extension has a directory containing its own manifest:
@@ -1361,6 +1364,7 @@ description: >
 author: Project Standard Community
 license: Apache-2.0
 provides:
+  skills: [security-scan]
   instructions: [security-baseline, audit-logging, access-control]
   agents: [security-auditor]
 permissions:
@@ -1382,7 +1386,60 @@ security auditor agent aligned with SOC2 Type II requirements.
 - **security-auditor**: Agent that reviews code for SOC2 compliance
 ```
 
-### 13.4 Frontmatter Fields
+### 13.4 Skill Manifests
+
+A **skill** is an invocable command or workflow provided by an extension. Skills differ from agents: an agent is a persistent role with broad capabilities (code reviewer, security auditor); a skill is a focused, task-oriented command (commit, generate-tests, scan-vulnerabilities).
+
+Each skill has its own directory under the extension:
+
+```
+extensions/
+  <extension-name>/
+    index.md                   # Extension manifest (provides: skills: [...])
+    skills/
+      <skill-name>/
+        index.md               # Skill prompt and metadata
+        <supporting-files>     # Optional scripts, templates, resources
+```
+
+Skill `index.md` format:
+
+```markdown
+---
+name: security-scan
+description: >
+  Scans the codebase for common security vulnerabilities.
+  USE WHEN performing security reviews or before releases.
+tools: [read_file, search, grep]
+mcp_servers: []
+tags: [security, scanning]
+---
+
+# Security Scan
+
+You are a security scanning assistant. Analyze the codebase for:
+
+1. Hardcoded secrets and credentials
+2. SQL injection vulnerabilities
+3. XSS attack vectors
+4. Insecure dependency usage
+
+Report findings in severity order (critical, high, medium, low).
+```
+
+#### Skill Frontmatter Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | REQUIRED | Skill identifier. |
+| `description` | string | REQUIRED | What the skill does and when to invoke it. |
+| `tools` | string[] | Optional | Tools the skill uses. |
+| `mcp_servers` | string[] | Optional | MCP servers required. |
+| `tags` | string[] | Optional | Categorical tags. |
+
+The skill body contains the **prompt** --- the instructions executed when the skill is invoked. This is loaded as Tier 2 content on invocation.
+
+### 13.5 Frontmatter Fields
 
 #### Required Fields
 
@@ -1398,25 +1455,25 @@ security auditor agent aligned with SOC2 Type II requirements.
 |-------|------|-------------|
 | `author` | string | Extension author or organization. |
 | `license` | string | SPDX license identifier. |
-| `provides` | object | What the extension contributes (instructions, agents, memory). |
+| `provides` | object | What the extension contributes (skills, instructions, agents, hooks, mcp_servers). |
 | `permissions` | object | Permissions the extension requires. |
 | `dependencies` | object | Other extensions this one depends on. |
 
-### 13.5 Loading Behavior
+### 13.6 Loading Behavior
 
-- **Tier 1**: Extension manifests are scanned. The `provides` field tells the system what additional instructions and agents are available.
-- **Tier 2**: Extension-provided instructions and agents are loaded using the same activation rules as project-level items.
-- **Tier 3**: Extension resources loaded on demand.
+- **Tier 1**: Extension manifests are scanned. The `provides` field tells the system what additional skills, instructions, and agents are available.
+- **Tier 2**: Extension-provided skills, instructions, and agents are loaded using the same activation rules as project-level items. Skill prompts are loaded when the skill is invoked.
+- **Tier 3**: Extension resources and skill supporting files loaded on demand.
 
 Extension-provided items SHOULD have lower priority than project-level items, allowing projects to override extension defaults.
 
-### 13.6 Mapping to Existing Standards
+### 13.7 Mapping to Existing Standards
 
 | `.project` | Claude Code | Codex | Cursor |
 |------------|------------|-------|--------|
-| `extensions/` | N/A | N/A | N/A |
-
-The extensions system is a novel addition. No existing AI coding tool provides a structured extension mechanism.
+| `extensions/` | `.claude/plugins/` | N/A | N/A |
+| Extension skills | `.claude/skills/` | N/A | N/A |
+| Extension registries | `.claude/marketplace.json` | N/A | N/A |
 
 ---
 
@@ -2162,7 +2219,7 @@ These fields MAY appear in any `.project/` markdown file:
 | `description` | string | REQUIRED | What the extension provides. |
 | `author` | string | Optional | Author or organization. |
 | `license` | string | Optional | SPDX license. |
-| `provides` | object | Optional | What the extension contributes. |
+| `provides` | object | Optional | What the extension contributes (skills, instructions, agents, hooks, mcp_servers). |
 | `permissions` | object | Optional | Required permissions. |
 | `dependencies` | object | Optional | Extension dependencies. |
 
