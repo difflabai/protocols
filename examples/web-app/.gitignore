@@ -1,0 +1,37 @@
+# .project local and secret files
+.project/local.md
+.project/**/local.md
+.project/**/*.local.md
+.project/**/*.secret.*
+.project/users/*.local.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+dist/
+build/
+bin/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
+*.coverprofile
+
+# Docker
+docker-compose.override.yml

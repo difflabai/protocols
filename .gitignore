@@ -8,6 +8,7 @@ build/
 # Misc
 .DS_Store
 *.log
+.idea/
 .env
 .env.local
 

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/conversation-frontmatter.schema.json",
+  "title": "Conversation Frontmatter",
+  "description": "Validates the YAML frontmatter of conversation files in .project/conversations/. Conversations are archived AI sessions with structured metadata for discovery and Tier 1 catalog building.",
+  "type": "object",
+  "required": ["title", "summary"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this conversation (e.g., conv-20240115-auth)."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable title summarizing the conversation topic."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Brief summary of the conversation outcomes and decisions. Used as the Tier 1 descriptor for relevance matching."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the conversation took place (ISO 8601 date format)."
+    },
+    "participants": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of participant identifiers involved in the conversation."
+    },
+    "provider": {
+      "type": "string",
+      "description": "AI provider used for this conversation (e.g., anthropic, openai)."
+    },
+    "model": {
+      "type": "string",
+      "description": "Specific model used (e.g., claude-sonnet-4-6)."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and discovery."
+    },
+    "format": {
+      "type": "string",
+      "enum": ["markdown", "jsonl", "provider-native"],
+      "description": "Format of the conversation body content."
+    }
+  },
+  "additionalProperties": true
+}

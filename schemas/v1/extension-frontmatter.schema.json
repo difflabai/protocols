@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/extension-frontmatter.schema.json",
+  "title": "Extension Frontmatter",
+  "description": "Validates the YAML frontmatter of extension manifest files in .project/extensions/. Extensions describe structural additions to the .project directory, providing directories, instructions, agents, and hooks.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this extension."
+    },
+    "provides": {
+      "type": "object",
+      "description": "What this extension contributes to the .project directory.",
+      "properties": {
+        "directories": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Custom directories added to .project/ by this extension."
+        },
+        "instructions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Instruction files or names provided by this extension."
+        },
+        "agents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Agent definitions provided by this extension."
+        },
+        "hooks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lifecycle hooks provided by this extension."
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "MCP server configurations provided by this extension."
+        }
+      },
+      "additionalProperties": true
+    },
+    "requires": {
+      "type": "object",
+      "description": "Dependencies this extension needs.",
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Other extensions that must be installed."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tools that must be available for this extension to function."
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/skill-frontmatter.schema.json",
+  "title": "Skill Frontmatter",
+  "description": "Validates the YAML frontmatter of skill files in .project/skills/. Skills are invocable commands and workflows with prompts.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tools the skill uses when invoked."
+    },
+    "mcp_servers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "MCP servers required by this skill."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Categorical tags for the skill."
+    },
+    "version": {
+      "type": "string",
+      "description": "Skill version (semver recommended)."
+    },
+    "registries": {
+      "type": "array",
+      "description": "Marketplace registries for discovering and installing skills. Used in skills/index.md.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this registry."
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL of the skill marketplace."
+          },
+          "auth": {
+            "$ref": "common/resource-descriptor.schema.json#/properties/auth"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["name", "description"],
+  "additionalProperties": true
+}

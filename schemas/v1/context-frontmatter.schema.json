@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/context-frontmatter.schema.json",
+  "title": "Context Frontmatter",
+  "description": "Validates the YAML frontmatter of context files in .project/context/. Context files represent content likely to be loaded into AI context — local documents, specs, diagrams, or fetchable remote URLs. Supports both companion metadata files (with a 'file' pointer) and remote resource descriptors.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "file": {
+      "type": "string",
+      "description": "Path to a companion file (relative to the context directory) that this metadata describes."
+    },
+    "auto_include": {
+      "type": "object",
+      "description": "Configuration for index.md to auto-discover context files by pattern. Only applicable in index.md files.",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for files to auto-include as context."
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for files to exclude from auto-inclusion."
+        },
+        "max_file_size": {
+          "type": "string",
+          "description": "Maximum file size for auto-included files (e.g., \"1MB\")."
+        }
+      },
+      "additionalProperties": true
+    },
+    "type": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/type"
+    },
+    "url": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/url"
+    },
+    "path": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/path"
+    },
+    "auth": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/auth"
+    },
+    "refresh": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/refresh"
+    },
+    "mime_type": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/mime_type"
+    }
+  },
+  "additionalProperties": true
+}

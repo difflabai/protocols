@@ -9,9 +9,9 @@ This repository contains open standards and protocols for AI development, mainta
 
 ## Available Standards
 
-### Projects *(coming soon)*
+### [Projects](/docs/projects)
 
-A standard for defining and managing AI projects, covering structure, metadata, and interoperability requirements.
+The `.project` standard defines a vendor-neutral directory structure for AI project context — instructions, memory, conversations, files, tasks, agents, and more — in a portable, markdown-first format that works across Claude, Codex, Cursor, Windsurf, Gemini, and other AI tools.
 
 ---
 

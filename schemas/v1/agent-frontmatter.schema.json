@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/agent-frontmatter.schema.json",
+  "title": "Agent Frontmatter",
+  "description": "Validates the YAML frontmatter of agent definition files in .project/agents/. Agents are AI personas with defined capabilities, provider preferences, permissions, and MCP server access. Maps to A2A Agent Cards.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of capabilities this agent supports (e.g., code-review, pr-review). Maps to A2A Agent Card skills."
+    },
+    "provider": {
+      "type": "object",
+      "description": "Preferred AI provider and model for this agent.",
+      "properties": {
+        "preferred": {
+          "type": "string",
+          "description": "Preferred AI provider identifier (e.g., anthropic, openai)."
+        },
+        "model": {
+          "type": "string",
+          "description": "Specific model to use (e.g., claude-sonnet-4-6)."
+        }
+      },
+      "additionalProperties": true
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Sandboxed permissions for what this agent can access.",
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for files/directories the agent can read."
+        },
+        "write": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for files/directories the agent can write."
+        },
+        "tools": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tool names the agent is allowed to use."
+        }
+      },
+      "additionalProperties": true
+    },
+    "mcp_servers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of MCP server names this agent can connect to."
+    }
+  },
+  "additionalProperties": true
+}

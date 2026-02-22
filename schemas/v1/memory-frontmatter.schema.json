@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectstandard.dev/schemas/v1/memory-frontmatter.schema.json",
+  "title": "Memory Frontmatter",
+  "description": "Validates the YAML frontmatter of memory files in .project/memory/. Memory files store persistent knowledge (facts, decisions, patterns). They may reference local content or external sources via resource descriptor fields.",
+  "type": "object",
+  "allOf": [
+    { "$ref": "common/catalog-entry.schema.json" }
+  ],
+  "properties": {
+    "name": true,
+    "description": true,
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tags for categorization and discovery."
+    },
+    "writable": {
+      "type": "boolean",
+      "description": "Whether AI agents may append to this memory file (auto-memory). Defaults to false."
+    },
+    "type": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/type"
+    },
+    "url": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/url"
+    },
+    "path": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/path"
+    },
+    "auth": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/auth"
+    },
+    "refresh": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/refresh"
+    },
+    "mime_type": {
+      "$ref": "common/resource-descriptor.schema.json#/properties/mime_type"
+    }
+  },
+  "additionalProperties": true
+}
