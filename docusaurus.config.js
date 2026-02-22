@@ -59,7 +59,7 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'protocolsSidebar',
             position: 'left',
-            label: 'Standards',
+            label: 'Protocols',
           },
           {
             href: 'https://github.com/difflabai/protocols',
