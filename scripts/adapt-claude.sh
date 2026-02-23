@@ -99,7 +99,7 @@ symlink() {
 # ---------------------------------------------------------------------------
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
-if [[ -f "$INSTRUCTIONS_DIR/index.md" ]]; then
+if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
     symlink ".project/instructions/index.md" "$PROJECT_ROOT/CLAUDE.md"
 fi
 
@@ -108,7 +108,12 @@ fi
 #    (skip index.md and local.md)
 # ---------------------------------------------------------------------------
 
-if [[ -d "$INSTRUCTIONS_DIR" ]]; then
+if $CLEAN; then
+    for link in "$PROJECT_ROOT/.claude/rules"/*.md; do
+        [[ -L "$link" ]] || continue
+        symlink "" "$link"
+    done
+elif [[ -d "$INSTRUCTIONS_DIR" ]]; then
     for file in "$INSTRUCTIONS_DIR"/*.md; do
         [[ -f "$file" ]] || continue
         base="$(basename "$file")"
@@ -123,7 +128,12 @@ fi
 # ---------------------------------------------------------------------------
 
 AGENTS_DIR="$DOT_PROJECT/agents"
-if [[ -d "$AGENTS_DIR" ]]; then
+if $CLEAN; then
+    for link in "$PROJECT_ROOT/.claude/agents"/*.md; do
+        [[ -L "$link" ]] || continue
+        symlink "" "$link"
+    done
+elif [[ -d "$AGENTS_DIR" ]]; then
     for file in "$AGENTS_DIR"/*.md; do
         [[ -f "$file" ]] || continue
         base="$(basename "$file")"
@@ -137,7 +147,15 @@ fi
 # ---------------------------------------------------------------------------
 
 SKILLS_DIR="$DOT_PROJECT/skills"
-if [[ -d "$SKILLS_DIR" ]]; then
+if $CLEAN; then
+    if [[ -d "$PROJECT_ROOT/.claude/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.claude/skills"/*/; do
+            [[ -d "$sdir" ]] || continue
+            [[ -L "$sdir/SKILL.md" ]] || continue
+            symlink "" "$sdir/SKILL.md"
+        done
+    fi
+elif [[ -d "$SKILLS_DIR" ]]; then
     for skill_dir in "$SKILLS_DIR"/*/; do
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue

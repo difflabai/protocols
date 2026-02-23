@@ -96,7 +96,7 @@ symlink() {
 # ---------------------------------------------------------------------------
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
-if [[ -f "$INSTRUCTIONS_DIR/index.md" ]]; then
+if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
     symlink ".project/instructions/index.md" "$PROJECT_ROOT/GEMINI.md"
 fi
 
@@ -106,7 +106,15 @@ fi
 # ---------------------------------------------------------------------------
 
 SKILLS_DIR="$DOT_PROJECT/skills"
-if [[ -d "$SKILLS_DIR" ]]; then
+if $CLEAN; then
+    if [[ -d "$PROJECT_ROOT/.gemini/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.gemini/skills"/*/; do
+            [[ -d "$sdir" ]] || continue
+            [[ -L "$sdir/SKILL.md" ]] || continue
+            symlink "" "$sdir/SKILL.md"
+        done
+    fi
+elif [[ -d "$SKILLS_DIR" ]]; then
     for skill_dir in "$SKILLS_DIR"/*/; do
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue
