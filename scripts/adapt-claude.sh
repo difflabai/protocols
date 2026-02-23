@@ -12,10 +12,10 @@
 #
 # Mappings (from Appendix B.1 of the .project spec):
 #
-#   .project/instructions/index.md    -> CLAUDE.md
-#   .project/instructions/<topic>.md  -> .claude/rules/<topic>.md
-#   .project/agents/<agent>.md        -> .claude/agents/<agent>.md
-#   .project/skills/<name>/index.md   -> .claude/skills/<name>/SKILL.md
+#   {.project,.aiproject}/instructions/index.md    -> CLAUDE.md
+#   {.project,.aiproject}/instructions/<topic>.md  -> .claude/rules/<topic>.md
+#   {.project,.aiproject}/agents/<agent>.md        -> .claude/agents/<agent>.md
+#   {.project,.aiproject}/skills/<name>/index.md   -> .claude/skills/<name>/SKILL.md
 #
 # Supported platforms: macOS, Linux, WSL, Windows (Git Bash / MSYS2)
 #
@@ -35,16 +35,49 @@ if [[ "${1:-}" == "--clean" ]]; then
 fi
 
 PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/..}" && pwd)"
-DOT_PROJECT="$PROJECT_ROOT/.project"
 
 # ---------------------------------------------------------------------------
-# Validate
+# Discover .project or .aiproject (or scaffold)
 # ---------------------------------------------------------------------------
 
-if [[ ! -d "$DOT_PROJECT" ]]; then
-    echo "Error: no .project/ directory found at $PROJECT_ROOT" >&2
+if [[ -d "$PROJECT_ROOT/.project" && -f "$PROJECT_ROOT/.project/PROJECT.md" ]]; then
+    DOT_PROJECT_DIR=".project"
+elif [[ -d "$PROJECT_ROOT/.aiproject" && -f "$PROJECT_ROOT/.aiproject/PROJECT.md" ]]; then
+    DOT_PROJECT_DIR=".aiproject"
+elif ! $CLEAN; then
+    DOT_PROJECT_DIR=".project"
+    echo "No .project/ or .aiproject/ found. Creating .project/ scaffold..."
+    mkdir -p "$PROJECT_ROOT/.project/instructions"
+    cat > "$PROJECT_ROOT/.project/PROJECT.md" << 'MANIFEST'
+---
+spec: "1.0"
+name: ""
+description: ""
+---
+
+# Project
+
+Add project overview and getting started instructions here.
+MANIFEST
+    cat > "$PROJECT_ROOT/.project/instructions/index.md" << 'INSTRUCTIONS'
+---
+name: base
+description: Base project instructions, always loaded.
+activation: always
+---
+
+# Instructions
+
+Add project coding standards and conventions here.
+INSTRUCTIONS
+    echo "  CREATED: .project/PROJECT.md"
+    echo "  CREATED: .project/instructions/index.md"
+else
+    echo "Error: no .project/ or .aiproject/ directory found at $PROJECT_ROOT" >&2
     exit 1
 fi
+
+DOT_PROJECT="$PROJECT_ROOT/$DOT_PROJECT_DIR"
 
 # ---------------------------------------------------------------------------
 # OS detection
@@ -100,7 +133,7 @@ symlink() {
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
 if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
-    symlink ".project/instructions/index.md" "$PROJECT_ROOT/CLAUDE.md"
+    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/CLAUDE.md"
 fi
 
 # ---------------------------------------------------------------------------
@@ -118,7 +151,7 @@ elif [[ -d "$INSTRUCTIONS_DIR" ]]; then
         [[ -f "$file" ]] || continue
         base="$(basename "$file")"
         [[ "$base" == "index.md" || "$base" == "local.md" ]] && continue
-        symlink "../../.project/instructions/$base" "$PROJECT_ROOT/.claude/rules/$base"
+        symlink "../../$DOT_PROJECT_DIR/instructions/$base" "$PROJECT_ROOT/.claude/rules/$base"
     done
 fi
 
@@ -138,7 +171,7 @@ elif [[ -d "$AGENTS_DIR" ]]; then
         [[ -f "$file" ]] || continue
         base="$(basename "$file")"
         [[ "$base" == "index.md" ]] && continue
-        symlink "../../.project/agents/$base" "$PROJECT_ROOT/.claude/agents/$base"
+        symlink "../../$DOT_PROJECT_DIR/agents/$base" "$PROJECT_ROOT/.claude/agents/$base"
     done
 fi
 
@@ -160,7 +193,7 @@ elif [[ -d "$SKILLS_DIR" ]]; then
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue
         name="$(basename "$skill_dir")"
-        symlink "../../../.project/skills/$name/index.md" "$PROJECT_ROOT/.claude/skills/$name/SKILL.md"
+        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.claude/skills/$name/SKILL.md"
     done
 fi
 

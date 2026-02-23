@@ -12,8 +12,8 @@
 #
 # Mappings:
 #
-#   .project/instructions/index.md    -> GEMINI.md
-#   .project/skills/<name>/index.md   -> .gemini/skills/<name>/SKILL.md
+#   {.project,.aiproject}/instructions/index.md    -> GEMINI.md
+#   {.project,.aiproject}/skills/<name>/index.md   -> .gemini/skills/<name>/SKILL.md
 #
 # Supported platforms: macOS, Linux, WSL, Windows (Git Bash / MSYS2)
 #
@@ -33,16 +33,49 @@ if [[ "${1:-}" == "--clean" ]]; then
 fi
 
 PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/..}" && pwd)"
-DOT_PROJECT="$PROJECT_ROOT/.project"
 
 # ---------------------------------------------------------------------------
-# Validate
+# Discover .project or .aiproject (or scaffold)
 # ---------------------------------------------------------------------------
 
-if [[ ! -d "$DOT_PROJECT" ]]; then
-    echo "Error: no .project/ directory found at $PROJECT_ROOT" >&2
+if [[ -d "$PROJECT_ROOT/.project" && -f "$PROJECT_ROOT/.project/PROJECT.md" ]]; then
+    DOT_PROJECT_DIR=".project"
+elif [[ -d "$PROJECT_ROOT/.aiproject" && -f "$PROJECT_ROOT/.aiproject/PROJECT.md" ]]; then
+    DOT_PROJECT_DIR=".aiproject"
+elif ! $CLEAN; then
+    DOT_PROJECT_DIR=".project"
+    echo "No .project/ or .aiproject/ found. Creating .project/ scaffold..."
+    mkdir -p "$PROJECT_ROOT/.project/instructions"
+    cat > "$PROJECT_ROOT/.project/PROJECT.md" << 'MANIFEST'
+---
+spec: "1.0"
+name: ""
+description: ""
+---
+
+# Project
+
+Add project overview and getting started instructions here.
+MANIFEST
+    cat > "$PROJECT_ROOT/.project/instructions/index.md" << 'INSTRUCTIONS'
+---
+name: base
+description: Base project instructions, always loaded.
+activation: always
+---
+
+# Instructions
+
+Add project coding standards and conventions here.
+INSTRUCTIONS
+    echo "  CREATED: .project/PROJECT.md"
+    echo "  CREATED: .project/instructions/index.md"
+else
+    echo "Error: no .project/ or .aiproject/ directory found at $PROJECT_ROOT" >&2
     exit 1
 fi
+
+DOT_PROJECT="$PROJECT_ROOT/$DOT_PROJECT_DIR"
 
 # ---------------------------------------------------------------------------
 # OS detection
@@ -97,7 +130,7 @@ symlink() {
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
 if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
-    symlink ".project/instructions/index.md" "$PROJECT_ROOT/GEMINI.md"
+    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/GEMINI.md"
 fi
 
 # ---------------------------------------------------------------------------
@@ -119,7 +152,7 @@ elif [[ -d "$SKILLS_DIR" ]]; then
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue
         name="$(basename "$skill_dir")"
-        symlink "../../../.project/skills/$name/index.md" "$PROJECT_ROOT/.gemini/skills/$name/SKILL.md"
+        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.gemini/skills/$name/SKILL.md"
     done
 fi
 

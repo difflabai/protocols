@@ -40,12 +40,56 @@ if (-not $ProjectRoot) {
     $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 }
 $ProjectRoot = (Resolve-Path $ProjectRoot).Path
-$DotProject = Join-Path $ProjectRoot '.project'
 
-if (-not (Test-Path $DotProject -PathType Container)) {
-    Write-Error "No .project/ directory found at $ProjectRoot"
+# ---------------------------------------------------------------------------
+# Discover .project or .aiproject (or scaffold)
+# ---------------------------------------------------------------------------
+
+$DotProjectDir = $null
+if ((Test-Path (Join-Path $ProjectRoot '.project') -PathType Container) -and
+    (Test-Path (Join-Path $ProjectRoot '.project\PROJECT.md'))) {
+    $DotProjectDir = '.project'
+}
+elseif ((Test-Path (Join-Path $ProjectRoot '.aiproject') -PathType Container) -and
+        (Test-Path (Join-Path $ProjectRoot '.aiproject\PROJECT.md'))) {
+    $DotProjectDir = '.aiproject'
+}
+elseif (-not $Clean) {
+    $DotProjectDir = '.project'
+    Write-Host 'No .project/ or .aiproject/ found. Creating .project/ scaffold...'
+    $scaffoldDir = Join-Path $ProjectRoot '.project'
+    New-Item -ItemType Directory -Path (Join-Path $scaffoldDir 'instructions') -Force | Out-Null
+    @"
+---
+spec: "1.0"
+name: ""
+description: ""
+---
+
+# Project
+
+Add project overview and getting started instructions here.
+"@ | Set-Content -Path (Join-Path $scaffoldDir 'PROJECT.md') -Encoding UTF8
+    @"
+---
+name: base
+description: Base project instructions, always loaded.
+activation: always
+---
+
+# Instructions
+
+Add project coding standards and conventions here.
+"@ | Set-Content -Path (Join-Path $scaffoldDir 'instructions\index.md') -Encoding UTF8
+    Write-Host '  CREATED: .project\PROJECT.md'
+    Write-Host '  CREATED: .project\instructions\index.md'
+}
+else {
+    Write-Error "No .project/ or .aiproject/ directory found at $ProjectRoot"
     exit 1
 }
+
+$DotProject = Join-Path $ProjectRoot $DotProjectDir
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -110,7 +154,7 @@ function Remove-EmptyDir {
 
 $InstructionsDir = Join-Path $DotProject 'instructions'
 if ((Test-Path (Join-Path $InstructionsDir 'index.md')) -or $Clean) {
-    New-Symlink -Target '.project\instructions\index.md' `
+    New-Symlink -Target "$DotProjectDir\instructions\index.md" `
                 -Link (Join-Path $ProjectRoot 'CLAUDE.md')
 }
 
@@ -134,7 +178,7 @@ elseif (Test-Path $InstructionsDir -PathType Container) {
     Get-ChildItem $InstructionsDir -Filter '*.md' | Where-Object {
         $_.Name -ne 'index.md' -and $_.Name -ne 'local.md'
     } | ForEach-Object {
-        New-Symlink -Target "..\..\.project\instructions\$($_.Name)" `
+        New-Symlink -Target "..\..\$DotProjectDir\instructions\$($_.Name)" `
                     -Link (Join-Path $RulesDir $_.Name)
     }
 }
@@ -160,7 +204,7 @@ elseif (Test-Path $AgentsSource -PathType Container) {
     Get-ChildItem $AgentsSource -Filter '*.md' | Where-Object {
         $_.Name -ne 'index.md'
     } | ForEach-Object {
-        New-Symlink -Target "..\..\.project\agents\$($_.Name)" `
+        New-Symlink -Target "..\..\$DotProjectDir\agents\$($_.Name)" `
                     -Link (Join-Path $AgentsDir $_.Name)
     }
 }
@@ -190,7 +234,7 @@ elseif (Test-Path $SkillsSource -PathType Container) {
         $indexMd = Join-Path $_.FullName 'index.md'
         if (Test-Path $indexMd) {
             $name = $_.Name
-            New-Symlink -Target "..\..\..\.project\skills\$name\index.md" `
+            New-Symlink -Target "..\..\..\$DotProjectDir\skills\$name\index.md" `
                         -Link (Join-Path $SkillsDir "$name\SKILL.md")
         }
     }
