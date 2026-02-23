@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 #
-# adapt-claude.sh — Create symlinks from .project/ to Claude Code locations
+# adapt-gemini.sh — Create symlinks from .project/ to Gemini CLI locations
 #
-# Maps the .project standard directory structure to where Claude Code
+# Maps the .project standard directory structure to where Google Gemini CLI
 # expects its configuration files. Uses relative symlinks so the repo
 # stays portable across machines.
 #
 # Usage:
-#   ./scripts/adapt-claude.sh [project-root]   # default: repo root
-#   ./scripts/adapt-claude.sh --clean [root]    # remove created symlinks
+#   ./project-standard/scripts/adapt-gemini.sh [project-root]   # default: repo root
+#   ./project-standard/scripts/adapt-gemini.sh --clean [root]    # remove created symlinks
 #
-# Mappings (from Appendix B.1 of the .project spec):
+# Mappings:
 #
-#   {.project,.aiproject}/instructions/index.md    -> CLAUDE.md
-#   {.project,.aiproject}/instructions/<topic>.md  -> .claude/rules/<topic>.md
-#   {.project,.aiproject}/agents/<agent>.md        -> .claude/agents/<agent>.md
-#   {.project,.aiproject}/skills/<name>/index.md   -> .claude/skills/<name>/SKILL.md
+#   {.project,.aiproject}/instructions/index.md    -> GEMINI.md
+#   {.project,.aiproject}/skills/<name>/index.md   -> .gemini/skills/<name>/SKILL.md
 #
 # Supported platforms: macOS, Linux, WSL, Windows (Git Bash / MSYS2)
 #
@@ -34,7 +32,7 @@ if [[ "${1:-}" == "--clean" ]]; then
     shift
 fi
 
-PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/..}" && pwd)"
+PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/../..}" && pwd)"
 
 # ---------------------------------------------------------------------------
 # Discover .project or .aiproject (or scaffold)
@@ -107,7 +105,6 @@ symlink() {
 
     case "$OS" in
         MINGW*|MSYS*|CYGWIN*)
-            # Windows: try cmd mklink first, fall back to ln -s
             local win_target win_link
             win_target="$(cygpath -w "$PROJECT_ROOT/$target" 2>/dev/null || echo "$target")"
             win_link="$(cygpath -w "$link" 2>/dev/null || echo "$link")"
@@ -128,61 +125,23 @@ symlink() {
 }
 
 # ---------------------------------------------------------------------------
-# 1. instructions/index.md -> CLAUDE.md
+# 1. instructions/index.md -> GEMINI.md
 # ---------------------------------------------------------------------------
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
 if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
-    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/CLAUDE.md"
+    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/GEMINI.md"
 fi
 
 # ---------------------------------------------------------------------------
-# 2. instructions/<topic>.md -> .claude/rules/<topic>.md
-#    (skip index.md and local.md)
-# ---------------------------------------------------------------------------
-
-if $CLEAN; then
-    for link in "$PROJECT_ROOT/.claude/rules"/*.md; do
-        [[ -L "$link" ]] || continue
-        symlink "" "$link"
-    done
-elif [[ -d "$INSTRUCTIONS_DIR" ]]; then
-    for file in "$INSTRUCTIONS_DIR"/*.md; do
-        [[ -f "$file" ]] || continue
-        base="$(basename "$file")"
-        [[ "$base" == "index.md" || "$base" == "local.md" ]] && continue
-        symlink "../../$DOT_PROJECT_DIR/instructions/$base" "$PROJECT_ROOT/.claude/rules/$base"
-    done
-fi
-
-# ---------------------------------------------------------------------------
-# 3. agents/<agent>.md -> .claude/agents/<agent>.md
-#    (skip index.md)
-# ---------------------------------------------------------------------------
-
-AGENTS_DIR="$DOT_PROJECT/agents"
-if $CLEAN; then
-    for link in "$PROJECT_ROOT/.claude/agents"/*.md; do
-        [[ -L "$link" ]] || continue
-        symlink "" "$link"
-    done
-elif [[ -d "$AGENTS_DIR" ]]; then
-    for file in "$AGENTS_DIR"/*.md; do
-        [[ -f "$file" ]] || continue
-        base="$(basename "$file")"
-        [[ "$base" == "index.md" ]] && continue
-        symlink "../../$DOT_PROJECT_DIR/agents/$base" "$PROJECT_ROOT/.claude/agents/$base"
-    done
-fi
-
-# ---------------------------------------------------------------------------
-# 4. skills/<name>/index.md -> .claude/skills/<name>/SKILL.md
+# 2. skills/<name>/index.md -> .gemini/skills/<name>/SKILL.md
+#    Gemini scans .gemini/skills/ (and .agents/skills/ as alias).
 # ---------------------------------------------------------------------------
 
 SKILLS_DIR="$DOT_PROJECT/skills"
 if $CLEAN; then
-    if [[ -d "$PROJECT_ROOT/.claude/skills" ]]; then
-        for sdir in "$PROJECT_ROOT/.claude/skills"/*/; do
+    if [[ -d "$PROJECT_ROOT/.gemini/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.gemini/skills"/*/; do
             [[ -d "$sdir" ]] || continue
             [[ -L "$sdir/SKILL.md" ]] || continue
             symlink "" "$sdir/SKILL.md"
@@ -193,7 +152,7 @@ elif [[ -d "$SKILLS_DIR" ]]; then
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue
         name="$(basename "$skill_dir")"
-        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.claude/skills/$name/SKILL.md"
+        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.gemini/skills/$name/SKILL.md"
     done
 fi
 
@@ -202,28 +161,26 @@ fi
 # ---------------------------------------------------------------------------
 
 if $CLEAN; then
-    # Remove skill subdirectories first (they nest deeper)
-    if [[ -d "$PROJECT_ROOT/.claude/skills" ]]; then
-        for sdir in "$PROJECT_ROOT/.claude/skills"/*/; do
+    # Remove skill subdirectories first
+    if [[ -d "$PROJECT_ROOT/.gemini/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.gemini/skills"/*/; do
             [[ -d "$sdir" ]] || continue
             if [[ -z "$(ls -A "$sdir" 2>/dev/null)" ]]; then
                 rmdir "$sdir" 2>/dev/null || true
             fi
         done
     fi
-    # Then remove top-level .claude subdirectories
-    for dir in "$PROJECT_ROOT/.claude/rules" \
-               "$PROJECT_ROOT/.claude/agents" \
-               "$PROJECT_ROOT/.claude/skills"; do
+    # Then remove parent directories if empty
+    for dir in "$PROJECT_ROOT/.gemini/skills"; do
         if [[ -d "$dir" ]] && [[ -z "$(ls -A "$dir" 2>/dev/null)" ]]; then
             rmdir "$dir" 2>/dev/null || true
         fi
     done
-    # Remove .claude/ itself if empty
-    if [[ -d "$PROJECT_ROOT/.claude" ]] && [[ -z "$(ls -A "$PROJECT_ROOT/.claude" 2>/dev/null)" ]]; then
-        rmdir "$PROJECT_ROOT/.claude" 2>/dev/null || true
+    # Only remove .gemini/ if completely empty (user may have settings.json)
+    if [[ -d "$PROJECT_ROOT/.gemini" ]] && [[ -z "$(ls -A "$PROJECT_ROOT/.gemini" 2>/dev/null)" ]]; then
+        rmdir "$PROJECT_ROOT/.gemini" 2>/dev/null || true
     fi
     echo "Done. Symlinks removed."
 else
-    echo "Done. Claude Code symlinks created."
+    echo "Done. Gemini CLI symlinks created."
 fi

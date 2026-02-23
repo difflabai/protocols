@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Create symlinks from .project/ to Claude Code locations.
+    Create symlinks from .project/ to Gemini CLI locations.
 
 .DESCRIPTION
-    Maps the .project standard directory structure to where Claude Code
+    Maps the .project standard directory structure to where Google Gemini CLI
     expects its configuration files. Uses relative symlinks so the repo
     stays portable across machines.
 
@@ -18,9 +18,9 @@
     Remove previously created symlinks instead of creating them.
 
 .EXAMPLE
-    .\scripts\adapt-claude.ps1
-    .\scripts\adapt-claude.ps1 -Clean
-    .\scripts\adapt-claude.ps1 -ProjectRoot C:\repos\my-app
+    .\project-standard\scripts\adapt-gemini.ps1
+    .\project-standard\scripts\adapt-gemini.ps1 -Clean
+    .\project-standard\scripts\adapt-gemini.ps1 -ProjectRoot C:\repos\my-app
 #>
 
 [CmdletBinding()]
@@ -37,7 +37,7 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 
 if (-not $ProjectRoot) {
-    $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+    $ProjectRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 }
 $ProjectRoot = (Resolve-Path $ProjectRoot).Path
 
@@ -97,8 +97,8 @@ $DotProject = Join-Path $ProjectRoot $DotProjectDir
 
 function New-Symlink {
     param(
-        [string]$Target,  # relative path from link location to real file
-        [string]$Link     # path where the symlink is created
+        [string]$Target,
+        [string]$Link
     )
 
     if ($Clean) {
@@ -112,7 +112,6 @@ function New-Symlink {
         return
     }
 
-    # Never overwrite a real (non-symlink) file
     if (Test-Path $Link) {
         $item = Get-Item $Link -Force -ErrorAction SilentlyContinue
         if ($item.LinkType -ne 'SymbolicLink') {
@@ -126,7 +125,6 @@ function New-Symlink {
         New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
     }
 
-    # Remove existing symlink before recreating
     if (Test-Path $Link) {
         Remove-Item $Link -Force
     }
@@ -149,72 +147,21 @@ function Remove-EmptyDir {
 }
 
 # ---------------------------------------------------------------------------
-# 1. instructions/index.md -> CLAUDE.md
+# 1. instructions/index.md -> GEMINI.md
 # ---------------------------------------------------------------------------
 
 $InstructionsDir = Join-Path $DotProject 'instructions'
 if ((Test-Path (Join-Path $InstructionsDir 'index.md')) -or $Clean) {
     New-Symlink -Target "$DotProjectDir\instructions\index.md" `
-                -Link (Join-Path $ProjectRoot 'CLAUDE.md')
+                -Link (Join-Path $ProjectRoot 'GEMINI.md')
 }
 
 # ---------------------------------------------------------------------------
-# 2. instructions/<topic>.md -> .claude/rules/<topic>.md
-#    (skip index.md and local.md)
-# ---------------------------------------------------------------------------
-
-$RulesDir = Join-Path $ProjectRoot '.claude\rules'
-
-if ($Clean) {
-    if (Test-Path $RulesDir) {
-        Get-ChildItem $RulesDir -Filter '*.md' -Force | Where-Object {
-            $_.LinkType -eq 'SymbolicLink'
-        } | ForEach-Object {
-            New-Symlink -Target '' -Link $_.FullName
-        }
-    }
-}
-elseif (Test-Path $InstructionsDir -PathType Container) {
-    Get-ChildItem $InstructionsDir -Filter '*.md' | Where-Object {
-        $_.Name -ne 'index.md' -and $_.Name -ne 'local.md'
-    } | ForEach-Object {
-        New-Symlink -Target "..\..\$DotProjectDir\instructions\$($_.Name)" `
-                    -Link (Join-Path $RulesDir $_.Name)
-    }
-}
-
-# ---------------------------------------------------------------------------
-# 3. agents/<agent>.md -> .claude/agents/<agent>.md
-#    (skip index.md)
-# ---------------------------------------------------------------------------
-
-$AgentsSource = Join-Path $DotProject 'agents'
-$AgentsDir = Join-Path $ProjectRoot '.claude\agents'
-
-if ($Clean) {
-    if (Test-Path $AgentsDir) {
-        Get-ChildItem $AgentsDir -Filter '*.md' -Force | Where-Object {
-            $_.LinkType -eq 'SymbolicLink'
-        } | ForEach-Object {
-            New-Symlink -Target '' -Link $_.FullName
-        }
-    }
-}
-elseif (Test-Path $AgentsSource -PathType Container) {
-    Get-ChildItem $AgentsSource -Filter '*.md' | Where-Object {
-        $_.Name -ne 'index.md'
-    } | ForEach-Object {
-        New-Symlink -Target "..\..\$DotProjectDir\agents\$($_.Name)" `
-                    -Link (Join-Path $AgentsDir $_.Name)
-    }
-}
-
-# ---------------------------------------------------------------------------
-# 4. skills/<name>/index.md -> .claude/skills/<name>/SKILL.md
+# 2. skills/<name>/index.md -> .gemini/skills/<name>/SKILL.md
 # ---------------------------------------------------------------------------
 
 $SkillsSource = Join-Path $DotProject 'skills'
-$SkillsDir = Join-Path $ProjectRoot '.claude\skills'
+$SkillsDir = Join-Path $ProjectRoot '.gemini\skills'
 
 if ($Clean) {
     if (Test-Path $SkillsDir) {
@@ -245,22 +192,18 @@ elseif (Test-Path $SkillsSource -PathType Container) {
 # ---------------------------------------------------------------------------
 
 if ($Clean) {
-    # Skill subdirectories
     if (Test-Path $SkillsDir) {
         Get-ChildItem $SkillsDir -Directory -Force | ForEach-Object {
             Remove-EmptyDir $_.FullName
         }
     }
-    # Top-level .claude subdirectories
-    foreach ($dir in @($RulesDir, $AgentsDir, $SkillsDir)) {
-        Remove-EmptyDir $dir
-    }
-    # .claude/ itself
-    $claudeDir = Join-Path $ProjectRoot '.claude'
-    Remove-EmptyDir $claudeDir
+    Remove-EmptyDir $SkillsDir
+    # Only remove .gemini/ if completely empty (user may have settings.json)
+    $geminiDir = Join-Path $ProjectRoot '.gemini'
+    Remove-EmptyDir $geminiDir
 
     Write-Host 'Done. Symlinks removed.'
 }
 else {
-    Write-Host 'Done. Claude Code symlinks created.'
+    Write-Host 'Done. Gemini CLI symlinks created.'
 }

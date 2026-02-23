@@ -5,7 +5,7 @@ sidebar_label: Specification
 
 # Specification
 
-The full `.project` standard specification is maintained at [`spec/v1/specification.md`](https://github.com/difflabai/protocols/blob/main/spec/v1/specification.md).
+The full `.project` standard specification is maintained at [`spec/v1/specification.md`](https://github.com/difflabai/protocols/blob/main/project-standard/spec/v1/specification.md).
 
 **Version:** 1.0.0-draft
 
@@ -23,4 +23,4 @@ The specification covers:
 - **Loading protocol** — the normative 3-tier progressive disclosure algorithm
 - **AGENTS.md reconciliation** — pointer and fallback patterns
 
-[Read the full specification on GitHub](https://github.com/difflabai/protocols/blob/main/spec/v1/specification.md)
+[Read the full specification on GitHub](https://github.com/difflabai/protocols/blob/main/project-standard/spec/v1/specification.md)

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 #
-# adapt-gemini.sh — Create symlinks from .project/ to Gemini CLI locations
+# adapt-codex.sh — Create symlinks from .project/ to Codex CLI locations
 #
-# Maps the .project standard directory structure to where Google Gemini CLI
+# Maps the .project standard directory structure to where OpenAI Codex CLI
 # expects its configuration files. Uses relative symlinks so the repo
 # stays portable across machines.
 #
 # Usage:
-#   ./scripts/adapt-gemini.sh [project-root]   # default: repo root
-#   ./scripts/adapt-gemini.sh --clean [root]    # remove created symlinks
+#   ./project-standard/scripts/adapt-codex.sh [project-root]   # default: repo root
+#   ./project-standard/scripts/adapt-codex.sh --clean [root]    # remove created symlinks
 #
-# Mappings:
+# Mappings (from Appendix B.2 of the .project spec + Codex docs):
 #
-#   {.project,.aiproject}/instructions/index.md    -> GEMINI.md
-#   {.project,.aiproject}/skills/<name>/index.md   -> .gemini/skills/<name>/SKILL.md
+#   {.project,.aiproject}/instructions/index.md    -> AGENTS.md
+#   {.project,.aiproject}/skills/<name>/index.md   -> .agents/skills/<name>/SKILL.md
 #
 # Supported platforms: macOS, Linux, WSL, Windows (Git Bash / MSYS2)
 #
@@ -32,7 +32,7 @@ if [[ "${1:-}" == "--clean" ]]; then
     shift
 fi
 
-PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/..}" && pwd)"
+PROJECT_ROOT="$(cd "${1:-$SCRIPT_DIR/../..}" && pwd)"
 
 # ---------------------------------------------------------------------------
 # Discover .project or .aiproject (or scaffold)
@@ -125,23 +125,23 @@ symlink() {
 }
 
 # ---------------------------------------------------------------------------
-# 1. instructions/index.md -> GEMINI.md
+# 1. instructions/index.md -> AGENTS.md
 # ---------------------------------------------------------------------------
 
 INSTRUCTIONS_DIR="$DOT_PROJECT/instructions"
 if [[ -f "$INSTRUCTIONS_DIR/index.md" ]] || $CLEAN; then
-    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/GEMINI.md"
+    symlink "$DOT_PROJECT_DIR/instructions/index.md" "$PROJECT_ROOT/AGENTS.md"
 fi
 
 # ---------------------------------------------------------------------------
-# 2. skills/<name>/index.md -> .gemini/skills/<name>/SKILL.md
-#    Gemini scans .gemini/skills/ (and .agents/skills/ as alias).
+# 2. skills/<name>/index.md -> .agents/skills/<name>/SKILL.md
+#    Codex scans .agents/skills/ at every directory level up to repo root.
 # ---------------------------------------------------------------------------
 
 SKILLS_DIR="$DOT_PROJECT/skills"
 if $CLEAN; then
-    if [[ -d "$PROJECT_ROOT/.gemini/skills" ]]; then
-        for sdir in "$PROJECT_ROOT/.gemini/skills"/*/; do
+    if [[ -d "$PROJECT_ROOT/.agents/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.agents/skills"/*/; do
             [[ -d "$sdir" ]] || continue
             [[ -L "$sdir/SKILL.md" ]] || continue
             symlink "" "$sdir/SKILL.md"
@@ -152,7 +152,7 @@ elif [[ -d "$SKILLS_DIR" ]]; then
         [[ -d "$skill_dir" ]] || continue
         [[ -f "$skill_dir/index.md" ]] || continue
         name="$(basename "$skill_dir")"
-        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.gemini/skills/$name/SKILL.md"
+        symlink "../../../$DOT_PROJECT_DIR/skills/$name/index.md" "$PROJECT_ROOT/.agents/skills/$name/SKILL.md"
     done
 fi
 
@@ -162,25 +162,22 @@ fi
 
 if $CLEAN; then
     # Remove skill subdirectories first
-    if [[ -d "$PROJECT_ROOT/.gemini/skills" ]]; then
-        for sdir in "$PROJECT_ROOT/.gemini/skills"/*/; do
+    if [[ -d "$PROJECT_ROOT/.agents/skills" ]]; then
+        for sdir in "$PROJECT_ROOT/.agents/skills"/*/; do
             [[ -d "$sdir" ]] || continue
             if [[ -z "$(ls -A "$sdir" 2>/dev/null)" ]]; then
                 rmdir "$sdir" 2>/dev/null || true
             fi
         done
     fi
-    # Then remove parent directories if empty
-    for dir in "$PROJECT_ROOT/.gemini/skills"; do
+    # Then remove parent directories
+    for dir in "$PROJECT_ROOT/.agents/skills" \
+               "$PROJECT_ROOT/.agents"; do
         if [[ -d "$dir" ]] && [[ -z "$(ls -A "$dir" 2>/dev/null)" ]]; then
             rmdir "$dir" 2>/dev/null || true
         fi
     done
-    # Only remove .gemini/ if completely empty (user may have settings.json)
-    if [[ -d "$PROJECT_ROOT/.gemini" ]] && [[ -z "$(ls -A "$PROJECT_ROOT/.gemini" 2>/dev/null)" ]]; then
-        rmdir "$PROJECT_ROOT/.gemini" 2>/dev/null || true
-    fi
     echo "Done. Symlinks removed."
 else
-    echo "Done. Gemini CLI symlinks created."
+    echo "Done. Codex symlinks created."
 fi

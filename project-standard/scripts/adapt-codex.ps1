@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Create symlinks from .project/ to Gemini CLI locations.
+    Create symlinks from .project/ to Codex CLI locations.
 
 .DESCRIPTION
-    Maps the .project standard directory structure to where Google Gemini CLI
+    Maps the .project standard directory structure to where OpenAI Codex CLI
     expects its configuration files. Uses relative symlinks so the repo
     stays portable across machines.
 
@@ -18,9 +18,9 @@
     Remove previously created symlinks instead of creating them.
 
 .EXAMPLE
-    .\scripts\adapt-gemini.ps1
-    .\scripts\adapt-gemini.ps1 -Clean
-    .\scripts\adapt-gemini.ps1 -ProjectRoot C:\repos\my-app
+    .\project-standard\scripts\adapt-codex.ps1
+    .\project-standard\scripts\adapt-codex.ps1 -Clean
+    .\project-standard\scripts\adapt-codex.ps1 -ProjectRoot C:\repos\my-app
 #>
 
 [CmdletBinding()]
@@ -37,7 +37,7 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 
 if (-not $ProjectRoot) {
-    $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
+    $ProjectRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSCommandPath))
 }
 $ProjectRoot = (Resolve-Path $ProjectRoot).Path
 
@@ -147,21 +147,21 @@ function Remove-EmptyDir {
 }
 
 # ---------------------------------------------------------------------------
-# 1. instructions/index.md -> GEMINI.md
+# 1. instructions/index.md -> AGENTS.md
 # ---------------------------------------------------------------------------
 
 $InstructionsDir = Join-Path $DotProject 'instructions'
 if ((Test-Path (Join-Path $InstructionsDir 'index.md')) -or $Clean) {
     New-Symlink -Target "$DotProjectDir\instructions\index.md" `
-                -Link (Join-Path $ProjectRoot 'GEMINI.md')
+                -Link (Join-Path $ProjectRoot 'AGENTS.md')
 }
 
 # ---------------------------------------------------------------------------
-# 2. skills/<name>/index.md -> .gemini/skills/<name>/SKILL.md
+# 2. skills/<name>/index.md -> .agents/skills/<name>/SKILL.md
 # ---------------------------------------------------------------------------
 
 $SkillsSource = Join-Path $DotProject 'skills'
-$SkillsDir = Join-Path $ProjectRoot '.gemini\skills'
+$SkillsDir = Join-Path $ProjectRoot '.agents\skills'
 
 if ($Clean) {
     if (Test-Path $SkillsDir) {
@@ -198,12 +198,11 @@ if ($Clean) {
         }
     }
     Remove-EmptyDir $SkillsDir
-    # Only remove .gemini/ if completely empty (user may have settings.json)
-    $geminiDir = Join-Path $ProjectRoot '.gemini'
-    Remove-EmptyDir $geminiDir
+    $agentsDir = Join-Path $ProjectRoot '.agents'
+    Remove-EmptyDir $agentsDir
 
     Write-Host 'Done. Symlinks removed.'
 }
 else {
-    Write-Host 'Done. Gemini CLI symlinks created.'
+    Write-Host 'Done. Codex symlinks created.'
 }
