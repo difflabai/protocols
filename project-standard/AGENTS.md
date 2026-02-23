@@ -78,9 +78,9 @@ when explicitly needed during execution.
 Symlink scripts that map `.project/` to provider-native paths:
 
 ```
-scripts/adapt-claude.sh   →  CLAUDE.md, .claude/rules/, .claude/agents/, .claude/skills/
-scripts/adapt-codex.sh    →  AGENTS.md, .agents/skills/
-scripts/adapt-gemini.sh   →  GEMINI.md, .gemini/skills/
+project-standard/scripts/adapt-claude.sh   →  CLAUDE.md, .claude/rules/, .claude/agents/, .claude/skills/
+project-standard/scripts/adapt-codex.sh    →  AGENTS.md, .agents/skills/
+project-standard/scripts/adapt-gemini.sh   →  GEMINI.md, .gemini/skills/
 ```
 
 Each script also has a `.ps1` PowerShell equivalent for native Windows support.
@@ -88,5 +88,5 @@ Run with `--clean` (bash) or `-Clean` (PowerShell) to remove symlinks.
 
 ## Specification
 
-Full spec: `spec/v1/specification.md`
+Full spec: `project-standard/spec/v1/specification.md`
 Website: https://protocols.difflab.ai

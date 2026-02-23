@@ -67,8 +67,8 @@ Add more as needed:
 ## Resources
 
 - [Full Specification](specification) — the complete standard
-- [Example Project](https://github.com/difflabai/protocols/tree/main/examples/web-app/.project) — a working example
-- [JSON Schemas](https://github.com/difflabai/protocols/tree/main/schemas/v1) — optional frontmatter validation
+- [Example Project](https://github.com/difflabai/protocols/tree/main/project-standard/examples/web-app/.project) — a working example
+- [JSON Schemas](https://github.com/difflabai/protocols/tree/main/project-standard/schemas/v1) — optional frontmatter validation
 
 ## Related Standards
 
